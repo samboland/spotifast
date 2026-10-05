@@ -482,17 +482,38 @@ pub fn window_controls(ui: &mut egui::Ui, palette: &theme::Palette, locale: crat
                         egui::ViewportCommand::Close,
                     ),
                 ] {
-                    let image = icon
-                        .image(palette.secondary, 14.0)
-                        .alt_text(tooltip.as_ref());
-                    let button = egui::Button::image(image).frame_when_inactive(false);
-                    if ui
-                        .add_sized(egui::Vec2::splat(36.0), button)
-                        .on_hover_text(tooltip.as_ref())
-                        .clicked()
-                    {
-                        ui.ctx().send_viewport_cmd(command);
-                    }
+                    ui.scope(|ui| {
+                        let close = matches!(command, egui::ViewportCommand::Close);
+                        let (hover, pressed) = if close {
+                            (
+                                egui::Color32::from_rgb(232, 17, 35),
+                                egui::Color32::from_rgb(174, 13, 26),
+                            )
+                        } else {
+                            (
+                                egui::Color32::from_white_alpha(26),
+                                egui::Color32::from_rgba_unmultiplied(160, 160, 160, 26),
+                            )
+                        };
+                        let visuals = &mut ui.style_mut().visuals.widgets;
+                        visuals.hovered.bg_fill = hover;
+                        visuals.hovered.weak_bg_fill = hover;
+                        visuals.hovered.bg_stroke = egui::Stroke::NONE;
+                        visuals.active.bg_fill = pressed;
+                        visuals.active.weak_bg_fill = pressed;
+                        visuals.active.bg_stroke = egui::Stroke::NONE;
+                        let image = icon
+                            .image(palette.secondary, 14.0)
+                            .alt_text(tooltip.as_ref());
+                        let button = egui::Button::image(image).frame_when_inactive(false);
+                        if ui
+                            .add_sized(egui::Vec2::splat(36.0), button)
+                            .on_hover_text(tooltip.as_ref())
+                            .clicked()
+                        {
+                            ui.ctx().send_viewport_cmd(command);
+                        }
+                    });
                 }
             });
         });
