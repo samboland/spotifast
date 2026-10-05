@@ -3077,3 +3077,11 @@ msgstr "在 Wayland 上，請使用桌面環境的「最上層顯示」快捷鍵
 
 #~ msgid "Reduce lyrics motion"
 #~ msgstr "減少歌詞動畫"
+
+msgid "Click player bar to change visualizer"
+msgstr ""
+
+msgid ""
+"Allow clicks on empty player bar space to cycle between spectrum, waveform, "
+"and off."
+msgstr ""

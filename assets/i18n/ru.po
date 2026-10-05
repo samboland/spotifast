@@ -3191,3 +3191,11 @@ msgstr ""
 
 #~ msgid "Reduce lyrics motion"
 #~ msgstr "Уменьшить анимацию текста"
+
+msgid "Click player bar to change visualizer"
+msgstr ""
+
+msgid ""
+"Allow clicks on empty player bar space to cycle between spectrum, waveform, "
+"and off."
+msgstr ""
