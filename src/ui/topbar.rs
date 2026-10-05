@@ -215,9 +215,15 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
             ),
         );
     }
-    ui.add_space(window_controls.topbar_top);
+    // Balance the visible header, including the gap below the control row.
+    let top_padding = if crate::window::custom_titlebar() {
+        4.0
+    } else {
+        0.0
+    };
+    ui.add_space(window_controls.topbar_top + top_padding);
     ui.allocate_ui_with_layout(
-        vec2(width, content_height),
+        vec2(width, content_height - top_padding),
         Layout::left_to_right(Align::Center),
         |ui| {
             ui.add_space(super::widgets::PAGE_PADDING);

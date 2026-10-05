@@ -454,7 +454,7 @@ pub fn window_controls(ui: &mut egui::Ui, palette: &theme::Palette, locale: crat
             Align2::RIGHT_TOP,
             vec2(
                 -WINDOW_RESIZE_BORDER,
-                (WINDOWS_WINDOW_CONTROLS_HEIGHT - 36.0) / 2.0,
+                (WINDOWS_WINDOW_CONTROLS_HEIGHT - 36.0) / 2.0 + 2.0,
             ),
         )
         .order(egui::Order::Foreground)
