@@ -3196,7 +3196,5 @@ msgstr ""
 msgid "Click player bar to change visualizer"
 msgstr ""
 
-msgid ""
-"Allow clicks on empty player bar space to cycle between spectrum, waveform, "
-"and off."
+msgid "Allow clicks on empty player bar space to cycle the visualizer."
 msgstr ""

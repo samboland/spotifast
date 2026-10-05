@@ -885,7 +885,7 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
         ),
         RowText::new(
             player_bar_vis_click.clone(),
-            gettext(locale, "Allow clicks on empty player bar space to cycle between spectrum, waveform, and off."),
+            gettext(locale, "Allow clicks on empty player bar space to cycle the visualizer."),
         ),
     ];
     if section_matches(&needle, &appearance, &appearance_rows) {

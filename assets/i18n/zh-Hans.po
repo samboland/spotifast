@@ -3074,7 +3074,5 @@ msgstr "在 Wayland 上，请使用桌面环境的“保持在最上层”快捷
 msgid "Click player bar to change visualizer"
 msgstr ""
 
-msgid ""
-"Allow clicks on empty player bar space to cycle between spectrum, waveform, "
-"and off."
+msgid "Allow clicks on empty player bar space to cycle the visualizer."
 msgstr ""
