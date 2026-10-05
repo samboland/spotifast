@@ -486,7 +486,7 @@ use a personal Spotify app, reconnect it in Settings as well.
 
 ## Lyrics
 
-Choose the microphone button in the player bar, or press **L**, to open lyrics.
+Choose the handheld microphone button in the player bar, or press **L**, to open lyrics.
 Synced lyrics follow the playing line automatically. Scroll to pause following,
 choose **Follow** to resume it, or choose a line to jump to that part of the song.
 

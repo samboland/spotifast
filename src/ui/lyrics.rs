@@ -127,7 +127,7 @@ fn contents(app: &mut App, ui: &mut egui::Ui) {
         widgets::empty_state(
             ui,
             &palette,
-            Icon::Mic,
+            Icon::MicVocal,
             &gettext(app.locale, "Nothing playing"),
             &gettext(app.locale, "Play a song to see its lyrics."),
         );
@@ -158,7 +158,7 @@ fn contents(app: &mut App, ui: &mut egui::Ui) {
             widgets::empty_state(
                 ui,
                 &palette,
-                Icon::Mic,
+                Icon::MicVocal,
                 &gettext(app.locale, "No lyrics"),
                 &gettext(app.locale, "No lyrics found for this track."),
             );
@@ -596,7 +596,7 @@ fn fullscreen_contents(app: &mut App, ui: &mut egui::Ui) {
         widgets::empty_state(
             ui,
             &palette,
-            Icon::Mic,
+            Icon::MicVocal,
             &gettext(app.locale, "Nothing playing"),
             &gettext(app.locale, "Play a song to see its lyrics."),
         );
@@ -627,7 +627,7 @@ fn fullscreen_contents(app: &mut App, ui: &mut egui::Ui) {
             widgets::empty_state(
                 ui,
                 &palette,
-                Icon::Mic,
+                Icon::MicVocal,
                 &gettext(app.locale, "No lyrics"),
                 &gettext(app.locale, "No lyrics found for this track."),
             );

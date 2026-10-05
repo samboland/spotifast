@@ -892,7 +892,7 @@ fn extras(app: &mut App, ui: &mut egui::Ui, now: Option<&NowPlaying>) {
     let queue_open = app.show_queue_panel || matches!(app.page(), Page::Queue);
     let queue_button = theme::icon_button(
         ui,
-        Icon::ListVideo,
+        Icon::ListMusic,
         18.0,
         if queue_open {
             palette.accent
@@ -918,7 +918,7 @@ fn extras(app: &mut App, ui: &mut egui::Ui, now: Option<&NowPlaying>) {
     }
     if theme::icon_button(
         ui,
-        Icon::Mic,
+        Icon::MicVocal,
         18.0,
         if app.show_lyrics_panel {
             palette.accent
