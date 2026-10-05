@@ -57,7 +57,7 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
                 ui.max_rect().min,
                 vec2(
                     ui.max_rect().width(),
-                    theme::TOP_BAR_HEIGHT + theme::titlebar_inset(ui.ctx()),
+                    theme::top_bar_height() + theme::titlebar_inset(ui.ctx()),
                 ),
             ),
         );
@@ -376,7 +376,7 @@ const fn titlebar_spans_window(on_macos: bool, custom_titlebar: bool) -> bool {
 const WINDOW_RESIZE_BORDER: f32 = 5.0;
 const WINDOW_RESIZE_CORNER: f32 = 10.0;
 const WINDOWS_WINDOW_CONTROLS_WIDTH: f32 = 3.0 * 36.0 + WINDOW_RESIZE_BORDER;
-const WINDOWS_WINDOW_CONTROLS_HEIGHT: f32 = 36.0 + WINDOW_RESIZE_BORDER;
+const WINDOWS_WINDOW_CONTROLS_HEIGHT: f32 = theme::CUSTOM_TOP_BAR_HEIGHT;
 // The 760-point minimum with the default 250-point sidebar leaves 510 points.
 const WINDOWS_MIN_INLINE_TOPBAR_WIDTH: f32 = 510.0 + WINDOWS_WINDOW_CONTROLS_WIDTH;
 
@@ -452,7 +452,10 @@ pub fn window_controls(ui: &mut egui::Ui, palette: &theme::Palette, locale: crat
     egui::Area::new(egui::Id::new("windows-window-controls"))
         .anchor(
             Align2::RIGHT_TOP,
-            vec2(-WINDOW_RESIZE_BORDER, WINDOW_RESIZE_BORDER),
+            vec2(
+                -WINDOW_RESIZE_BORDER,
+                (WINDOWS_WINDOW_CONTROLS_HEIGHT - 36.0) / 2.0,
+            ),
         )
         .order(egui::Order::Foreground)
         .show(ui.ctx(), |ui| {

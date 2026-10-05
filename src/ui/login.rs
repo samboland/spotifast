@@ -21,7 +21,7 @@ pub fn show(app: &mut App, ui: &mut egui::Ui, connecting: bool) {
             let drag_rect = if cfg!(target_os = "macos") {
                 Rect::from_min_size(
                     rect.min,
-                    Vec2::new(rect.width(), theme::TOP_BAR_HEIGHT + theme::titlebar_inset(ui.ctx())),
+                    Vec2::new(rect.width(), theme::top_bar_height() + theme::titlebar_inset(ui.ctx())),
                 )
             } else {
                 rect
