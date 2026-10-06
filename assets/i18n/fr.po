@@ -3203,3 +3203,9 @@ msgstr ""
 
 msgid "Allow clicks on empty player bar space to cycle the visualizer."
 msgstr ""
+
+msgid "Now Playing view"
+msgstr ""
+
+msgid "Show artwork, track details, and the next song on the right."
+msgstr ""

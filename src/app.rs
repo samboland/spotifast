@@ -1350,6 +1350,10 @@ impl App {
         }))
     }
 
+    pub fn now_playing_panel_visible(&self) -> bool {
+        self.settings.now_playing_panel && !self.show_queue_panel && !self.show_lyrics_panel
+    }
+
     pub fn now_playing(&self) -> Option<NowPlaying> {
         if let Some(now) = &self.frame_now {
             return Some(now.clone());
@@ -2667,6 +2671,7 @@ impl App {
         }
         if matches!(self.page(), Page::Queue)
             || self.show_queue_panel
+            || self.now_playing_panel_visible()
             || (self.settings.winamp_window && self.settings.playlist_open)
         {
             self.refresh_queue(true);
@@ -2787,7 +2792,10 @@ impl App {
                 self.refresh_devices();
             }
             let playlist_open = self.settings.winamp_window && self.settings.playlist_open;
-            if (self.show_queue_panel || matches!(self.page(), Page::Queue) || playlist_open)
+            if (self.show_queue_panel
+                || self.now_playing_panel_visible()
+                || matches!(self.page(), Page::Queue)
+                || playlist_open)
                 && !self.queue.is_loading()
                 && self
                     .queue_fetched_at
@@ -16514,9 +16522,27 @@ mod tests {
         )
     }
 
-    /// #369: Go to song radio opens the radio's page, as in Spotify's app,
-    /// and plays nothing until asked.
     #[test]
+    fn now_playing_returns_after_other_panels_close() {
+        let ctx = egui::Context::default();
+        let mut app = headless_app();
+        assert!(!app.now_playing_panel_visible());
+        app.settings.now_playing_panel = true;
+        assert!(app.now_playing_panel_visible());
+        app.apply(Action::ToggleQueuePanel, &ctx);
+        assert!(!app.now_playing_panel_visible());
+        app.apply(Action::ToggleQueuePanel, &ctx);
+        assert!(app.now_playing_panel_visible());
+        app.apply(Action::ToggleLyricsPanel, &ctx);
+        assert!(!app.now_playing_panel_visible());
+        app.apply(Action::ToggleLyricsPanel, &ctx);
+        assert!(app.now_playing_panel_visible());
+        app.settings.now_playing_panel = false;
+        assert!(!app.now_playing_panel_visible());
+    }
+
+    #[test]
+    /// #369: Go to song radio opens its page without starting playback.
     fn song_radio_opens_its_page_without_playing() {
         let ctx = egui::Context::default();
         let mut app = headless_app();

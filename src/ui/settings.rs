@@ -805,6 +805,7 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
     let middle_click = gettext(locale, "Middle-click autoscroll");
     let custom_titlebar = gettext(locale, "Custom title bar");
     let player_bar_vis = gettext(locale, "Player bar visualizer");
+    let now_playing_panel = gettext(locale, "Now Playing view");
     let player_bar_vis_click = gettext(locale, "Click player bar to change visualizer");
     let appearance_rows = [
         RowText::new(theme_title.clone(), {
@@ -886,6 +887,10 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
         RowText::new(
             player_bar_vis_click.clone(),
             gettext(locale, "Allow clicks on empty player bar space to cycle the visualizer."),
+        ),
+        RowText::new(
+            now_playing_panel.clone(),
+            gettext(locale, "Show artwork, track details, and the next song on the right."),
         ),
     ];
     if section_matches(&needle, &appearance, &appearance_rows) {
@@ -1071,6 +1076,25 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
                     },
                 );
             }
+            filtered_row(
+                ui,
+                &palette,
+                &needle,
+                &appearance,
+                &appearance_rows[10],
+                |ui| {
+                    if widgets::switch(
+                        ui,
+                        &palette,
+                        &now_playing_panel,
+                        &mut app.settings.now_playing_panel,
+                    )
+                    .changed()
+                    {
+                        changed = true;
+                    }
+                },
+            );
             filtered_row(
                 ui,
                 &palette,

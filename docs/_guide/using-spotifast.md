@@ -340,6 +340,14 @@ has no place in Spotify's playlist tree. Returning to **Local custom order**
 restores its saved position. Dragging a song onto Liked Songs still saves that
 song, wherever the row sits.
 
+**Now Playing view** in **Settings > Appearance** opens a panel on the right
+with large artwork, the current track and artist links, an album link, a
+Liked Songs button, and the next queued track. Click **Next up** to open the
+queue. Queue and Lyrics temporarily replace the view; closing them brings it
+back. It hides when the window is too narrow and returns when space permits.
+The switch is off by default and is saved across restarts. Artist
+biographies, monthly listener counts, and detailed credits are not shown.
+
 **Player bar visualizer** in **Settings > Appearance** shows the song moving
 behind the player bar's controls: **Spectrum** draws glowing bars from bass
 to treble with peaks that hang and fall, and **Waveform** draws the sound's

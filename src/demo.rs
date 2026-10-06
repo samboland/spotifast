@@ -773,6 +773,7 @@ pub fn apply_flags(app: &mut App, page: Option<&str>, show: Option<&str>) {
                     380.0
                 };
             }
+            "now-playing" => app.settings.now_playing_panel = true,
             "queue" => app.show_queue_panel = true,
             "playing-next" => {
                 app.show_queue_panel = true;

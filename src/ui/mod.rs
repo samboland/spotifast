@@ -11,6 +11,7 @@ mod keys;
 pub mod library;
 pub mod login;
 mod lyrics;
+mod now_playing;
 pub mod player_bar;
 pub mod queue;
 pub mod radio;
@@ -74,6 +75,14 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
         }
         if app.show_lyrics_panel {
             lyrics::side_panel(app, ui);
+        }
+        let now_playing_visible = app.now_playing_panel_visible()
+            && ui.available_width() >= topbar::least_width(ctx) + theme::SIDE_PANEL_MIN_WIDTH;
+        ctx.data_mut(|data| {
+            data.insert_temp(Id::new("now-playing-panel-visible"), now_playing_visible)
+        });
+        if now_playing_visible {
+            now_playing::side_panel(app, ui);
         }
         central(app, ui);
         keep_room_for_panels(app, ctx);

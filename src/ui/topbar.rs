@@ -198,7 +198,11 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
     let width = ui.available_width();
     let window_controls = super::window_controls_reservation(
         ui.ctx(),
-        app.show_queue_panel,
+        app.show_queue_panel
+            || ui.ctx().data(|data| {
+                data.get_temp::<bool>(egui::Id::new("now-playing-panel-visible"))
+                    .unwrap_or(false)
+            }),
         app.show_lyrics_panel,
         width,
     );
