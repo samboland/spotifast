@@ -9115,6 +9115,23 @@ impl App {
             Action::OpenThemesFolder => {
                 self.backend.send(Command::OpenThemesFolder);
             }
+            Action::LoadNowPlayingArtists => {
+                if let Some(now) = self
+                    .now_playing()
+                    .filter(|_| self.settings.now_playing_panel)
+                {
+                    for artist in now.artists {
+                        if let Some(id) = artist.id {
+                            let page = self.artist_pages.entry(id.clone()).or_default();
+                            if matches!(page.artist, Loadable::NotLoaded) {
+                                page.artist = Loadable::Loading;
+                                self.backend.api(ApiRequest::Artist { id: id.clone() });
+                                self.request_contains(vec![format!("spotify:artist:{id}")]);
+                            }
+                        }
+                    }
+                }
+            }
             Action::SettingsChanged => {
                 self.settings_dirty = true;
                 ctx.set_theme(self.theme_preference());
@@ -10758,7 +10775,7 @@ mod tests {
                     .rect
                     .center()
             } else {
-                egui::pos2(1120.0, 100.0)
+                egui::pos2(1120.0, 180.0)
             };
             let press = |button, pressed| egui::Event::PointerButton {
                 pos: anchor,

@@ -341,12 +341,16 @@ restores its saved position. Dragging a song onto Liked Songs still saves that
 song, wherever the row sits.
 
 **Now Playing view** in **Settings > Appearance** opens a panel on the right
-with large artwork, the current track and artist links, an album link, a
-Liked Songs button, and the next queued track. Click **Next up** to open the
-queue. Queue and Lyrics temporarily replace the view; closing them brings it
-back. It hides when the window is too narrow and returns when space permits.
-The switch is off by default and is saved across restarts. Artist
-biographies, monthly listener counts, and detailed credits are not shown.
+with large artwork, the playing context, track and artist links, a save button,
+and a next-track card. The share button copies the track link. Artist cards
+show available images, names, genres, and follow controls; biographies,
+monthly listener counts, and detailed composer credits are not available.
+The header stays above the panels, so opening one does not move its controls.
+Now Playing and Lyrics share the same saved width. Resize either panel to
+change both. Queue and Lyrics temporarily replace Now Playing; closing them
+brings it back. Narrow windows hide Now Playing until space permits.
+The switch is off by default and is saved across restarts. Enabling it
+refreshes the queue immediately; the next-track card also has a refresh button.
 
 **Player bar visualizer** in **Settings > Appearance** shows the song moving
 behind the player bar's controls: **Spectrum** draws glowing bars from bass

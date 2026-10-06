@@ -70,6 +70,15 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
         if app.settings.sidebar_visible {
             sidebar::show(app, ui);
         }
+        let header_space = window_controls_reservation(ctx, false, false, ui.available_width());
+        egui::Panel::top("main-header")
+            .exact_size(
+                theme::top_bar_height() + theme::titlebar_inset(ctx) + header_space.topbar_top,
+            )
+            .resizable(false)
+            .show_separator_line(false)
+            .frame(Frame::new().fill(app.palette.window))
+            .show(ui, |ui| topbar::show(app, ui));
         if app.show_queue_panel {
             queue::side_panel(app, ui);
         }
@@ -287,7 +296,7 @@ fn central(app: &mut App, ui: &mut egui::Ui) {
             // colour, which shows as a pale band over a cover's tint; the
             // page casts a shadow under the header instead.
             ui.spacing_mut().scroll.fade.strength = 0.0;
-            topbar::show(app, ui);
+
             let page = app.page().clone();
             let scroll = crate::autoscroll::show(
                 ui,

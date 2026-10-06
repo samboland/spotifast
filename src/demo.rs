@@ -9100,7 +9100,7 @@ mod tests {
         app.backend.shutdown();
     }
     #[test]
-    fn side_panels_keep_their_full_height_beside_the_page_toolbar() {
+    fn side_panels_start_below_the_shared_header() {
         for theme in ["dark", "light"] {
             let (ctx, mut app) = accessible_app(&format!("full-height-panels-{theme}"));
             app.open(Page::Playlist("pl1".into()));
@@ -9133,13 +9133,13 @@ mod tests {
                             .outer_rect
                     };
                     let side = rect(&format!("{panel}-panel"));
-                    let library = rect("sidebar");
+                    let header = rect("main-header");
                     let player = rect("player-bar");
-                    assert_eq!(side.top(), library.top(), "{panel} at {width} in {theme}");
-                    assert_eq!(side.top(), 0.0, "{panel} must start at the window top");
+                    assert_eq!(side.top(), header.bottom(), "{panel} at {width} in {theme}");
+                    assert_eq!(header.right(), width, "header spans the right panel");
                     assert_eq!(side.bottom(), player.top());
                     let search = ctx.read_response(egui::Id::new("global-search")).unwrap();
-                    assert!(side.top() < search.rect.top());
+                    assert!(side.top() >= search.rect.bottom());
                 }
             }
             app.backend.shutdown();

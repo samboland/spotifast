@@ -1091,6 +1091,9 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
                     )
                     .changed()
                     {
+                        if app.settings.now_playing_panel {
+                            app.actions.push(crate::model::Action::RefreshQueue);
+                        }
                         changed = true;
                     }
                 },

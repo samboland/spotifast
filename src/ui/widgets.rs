@@ -39,6 +39,42 @@ pub(super) struct CoverSources<'a> {
     pub align_thumbnail: bool,
 }
 
+/// Fit the full cover inside its reserved square without cropping its edges.
+pub(super) fn paint_cover_contained(
+    ui: &Ui,
+    palette: &Palette,
+    url: Option<&str>,
+    rect: Rect,
+    radius: f32,
+    art: Option<&crate::images::ArtLoader>,
+) {
+    if let Some(url) = url {
+        if let Some(art) = art {
+            art.touch(url);
+        }
+        let image = egui::Image::new(url).show_loading_spinner(false);
+        if let Ok(egui::load::TexturePoll::Ready { texture }) =
+            image.load_for_size(ui.ctx(), rect.size())
+        {
+            if let Some(art) = art {
+                art.release_bytes(url);
+                art.note_decoded(
+                    url,
+                    texture.size.x.round() as usize,
+                    texture.size.y.round() as usize,
+                );
+            }
+            let scale = (rect.width() / texture.size.x).min(rect.height() / texture.size.y);
+            let fitted = Rect::from_center_size(rect.center(), texture.size * scale);
+            egui::Image::new(texture)
+                .corner_radius(radius as u8)
+                .paint_at(ui, fitted);
+            return;
+        }
+    }
+    paint_cover(ui, palette, url, rect, radius, Icon::Music, art);
+}
+
 pub fn paint_cover(
     ui: &Ui,
     palette: &Palette,
