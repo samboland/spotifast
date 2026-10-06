@@ -28,7 +28,7 @@ fn heading(app: &mut App, ui: &mut egui::Ui, title: &str) {
     ui.add_space(16.0);
 }
 
-fn follow(app: &mut App, ui: &mut egui::Ui, uri: &str) {
+pub(super) fn follow(app: &mut App, ui: &mut egui::Ui, uri: &str) {
     let following = app.is_saved(uri).unwrap_or(false);
     let label = if following {
         pgettext(app.locale, "artist", "Following")
@@ -132,19 +132,24 @@ pub fn about(app: &mut App, ui: &mut egui::Ui, id: &str) {
 
 pub fn credits(app: &mut App, ui: &mut egui::Ui, uri: &str, name: &str) {
     let palette = app.palette;
+    ui.set_width((ui.ctx().content_rect().width() - 96.0).clamp(240.0, 420.0));
     heading(app, ui, &gettext(app.locale, "Credits"));
     ui.add(
         egui::Label::new(
             egui::RichText::new(name)
-                .font(theme::bold(18.0))
+                .font(theme::bold(16.0))
                 .color(palette.text),
         )
         .wrap(),
     );
-    ui.add_space(16.0);
+    ui.add_space(20.0);
+    ui.separator();
+    ui.add_space(20.0);
+    let height = (ui.ctx().content_rect().height() - 230.0).max(100.0);
     egui::ScrollArea::vertical()
         .id_salt("track-credits")
-        .max_height((ui.ctx().content_rect().height() - 220.0).max(120.0))
+        .min_scrolled_height(height)
+        .max_height(height)
         .show(ui, |ui| {
             if let Some(details) = state(
                 app,
@@ -163,18 +168,35 @@ pub fn credits(app: &mut App, ui: &mut egui::Ui, uri: &str, name: &str) {
                         palette.secondary,
                     );
                 }
-                for credit in details.credits {
-                    theme::text(ui, &credit.name, theme::bold(16.0), palette.text);
-                    theme::text(
-                        ui,
-                        crate::details::role_label(credit.role, app.locale),
-                        theme::regular(14.0),
-                        palette.secondary,
-                    );
-                    if let Some(uri) = credit.uri {
-                        follow(app, ui, &uri);
+                for (composition, title) in [
+                    (false, gettext(app.locale, "Artist")),
+                    (true, gettext(app.locale, "Composition & Lyrics")),
+                ] {
+                    let credits: Vec<_> = details
+                        .credits
+                        .iter()
+                        .filter(|credit| (credit.role == 5) == composition)
+                        .collect();
+                    if credits.is_empty() {
+                        continue;
                     }
-                    ui.add_space(14.0);
+                    theme::text(ui, title, theme::bold(20.0), palette.text);
+                    ui.add_space(20.0);
+                    for credit in credits {
+                        let role = crate::details::role_label(credit.role, app.locale);
+                        credit_row(
+                            app,
+                            ui,
+                            &credit.name,
+                            &role,
+                            if composition {
+                                None
+                            } else {
+                                credit.uri.as_deref()
+                            },
+                        );
+                        ui.add_space(22.0);
+                    }
                 }
                 if let Some(label) = details.label {
                     theme::text(
@@ -183,8 +205,48 @@ pub fn credits(app: &mut App, ui: &mut egui::Ui, uri: &str, name: &str) {
                         theme::bold(16.0),
                         palette.text,
                     );
-                    theme::text(ui, label, theme::regular(14.0), palette.secondary);
+                    ui.add_space(6.0);
+                    ui.add(
+                        egui::Label::new(egui::RichText::new(label).color(palette.secondary))
+                            .wrap(),
+                    );
                 }
             }
         });
+}
+
+pub(super) fn credit_row(
+    app: &mut App,
+    ui: &mut egui::Ui,
+    name: &str,
+    role: &str,
+    uri: Option<&str>,
+) {
+    let palette = app.palette;
+    // Reserve the Follow button first, so long names wrap without pushing it outside the card.
+    ui.horizontal(|ui| {
+        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+            if let Some(uri) = uri {
+                follow(app, ui, uri);
+            }
+            ui.with_layout(egui::Layout::top_down(egui::Align::Min), |ui| {
+                ui.add(
+                    egui::Label::new(
+                        egui::RichText::new(name)
+                            .font(theme::regular(16.0))
+                            .color(palette.text),
+                    )
+                    .wrap(),
+                );
+                ui.add(
+                    egui::Label::new(
+                        egui::RichText::new(role)
+                            .font(theme::regular(14.0))
+                            .color(palette.secondary),
+                    )
+                    .wrap(),
+                );
+            });
+        });
+    });
 }

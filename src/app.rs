@@ -9156,6 +9156,31 @@ impl App {
                     .now_playing()
                     .filter(|_| self.settings.now_playing_panel)
                 {
+                    let mut uris: Vec<_> = now
+                        .artists
+                        .iter()
+                        .filter_map(|artist| {
+                            artist.id.as_ref().map(|id| format!("spotify:artist:{id}"))
+                        })
+                        .collect();
+                    if !now.is_episode {
+                        uris.push(now.uri.clone());
+                    }
+                    if let Some(user) = &self.user {
+                        for uri in uris {
+                            if self
+                                .details
+                                .get(&uri)
+                                .is_none_or(|details| matches!(details, Loadable::NotLoaded))
+                            {
+                                self.details.insert(uri.clone(), Loadable::Loading);
+                                self.backend.send(Command::Details {
+                                    account: user.id.clone(),
+                                    uri,
+                                });
+                            }
+                        }
+                    }
                     for artist in now.artists {
                         if let Some(id) = artist.id {
                             let page = self.artist_pages.entry(id.clone()).or_default();

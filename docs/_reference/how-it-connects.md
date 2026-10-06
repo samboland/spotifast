@@ -388,3 +388,8 @@ On startup, network work waits for the protected proxy password to be restored.
 That lookup runs on the credential worker and does not block the interface or
 shutdown. The password belongs to its host, port, and username; editing any of
 these fields clears it. See [password storage and migration](/settings-and-files/).
+
+The optional Now Playing view reads artist biographies and track contributor
+roles through the local playback session. These details are cached for the
+account. The artist summary opens About; the Credits card opens the full
+credits grouped by role. Failed reads can be retried in the dialog.

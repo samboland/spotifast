@@ -912,33 +912,44 @@ pub fn apply_flags(app: &mut App, page: Option<&str>, show: Option<&str>) {
                     url: "https://spotifast.rocks/download/".into(),
                 });
             }
-            "about-artist" => {
+            "about-artist" | "about-card" => {
                 if let Some(id) = app
                     .now_playing()
                     .and_then(|now| now.artists.first().and_then(|artist| artist.id.clone()))
                 {
                     app.details.insert(format!("spotify:artist:{id}"), Loadable::Loaded(crate::details::Details { biography: Some("Demo biography for layout testing. This text is a fixture, not a statement about the pictured artist.".into()), ..Default::default() }));
-                    app.dialog = Some(Dialog::ArtistAbout { id });
+                    if surface == "about-artist" {
+                        app.dialog = Some(Dialog::ArtistAbout { id });
+                    }
                 }
             }
-            "credits" => {
+            "credits" | "credits-card" => {
                 if let Some(now) = app.now_playing() {
                     app.details.insert(
                         now.uri.clone(),
                         Loadable::Loaded(crate::details::Details {
-                            credits: vec![crate::details::Credit {
-                                name: "Demo contributor".into(),
-                                uri: None,
-                                role: 5,
-                            }],
+                            credits: vec![
+                                crate::details::Credit {
+                                    name: "Demo contributor".into(),
+                                    uri: Some("spotify:artist:demo".into()),
+                                    role: 1,
+                                },
+                                crate::details::Credit {
+                                    name: "Demo contributor".into(),
+                                    uri: Some("spotify:artist:demo".into()),
+                                    role: 5,
+                                },
+                            ],
                             label: Some("Demo label".into()),
                             ..Default::default()
                         }),
                     );
-                    app.dialog = Some(Dialog::TrackCredits {
-                        uri: now.uri,
-                        name: now.title,
-                    });
+                    if surface == "credits" {
+                        app.dialog = Some(Dialog::TrackCredits {
+                            uri: now.uri,
+                            name: now.title,
+                        });
+                    }
                 }
             }
             "personal-app" => app.dialog = Some(Dialog::PersonalAppIntro),
@@ -3034,6 +3045,102 @@ mod tests {
 
     /// The About card ends with the author's credit, and the name opens
     /// the author's website.
+    #[test]
+    fn artist_summary_padding_opens_about() {
+        let (ctx, mut app) = accessible_app("artist-summary-click");
+        apply_flags(
+            &mut app,
+            Some("playlist:pl1"),
+            Some("now-playing,about-card,credits-card"),
+        );
+        let mut target = None;
+        for _ in 0..3 {
+            let mut output = ctx.run_ui(
+                egui::RawInput {
+                    screen_rect: Some(egui::Rect::from_min_size(
+                        egui::Pos2::ZERO,
+                        egui::vec2(1280.0, 1400.0),
+                    )),
+                    ..Default::default()
+                },
+                |ui| app.frame_ui(ui),
+            );
+            output.textures_delta.clear();
+            for shape in &output.shapes {
+                if let egui::epaint::Shape::Text(text) = &shape.shape {
+                    if text.galley.job.text.starts_with("Demo biography") {
+                        let rect = text.galley.rect.translate(text.pos.to_vec2());
+                        target = Some(egui::pos2(rect.left() + 2.0, rect.bottom() + 4.0));
+                    }
+                }
+            }
+        }
+        let pos = target.expect("artist summary is visible");
+        let mut output = ctx.run_ui(
+            egui::RawInput {
+                screen_rect: Some(egui::Rect::from_min_size(
+                    egui::Pos2::ZERO,
+                    egui::vec2(1280.0, 1400.0),
+                )),
+                events: vec![
+                    egui::Event::PointerMoved(pos),
+                    egui::Event::PointerButton {
+                        pos,
+                        button: egui::PointerButton::Primary,
+                        pressed: true,
+                        modifiers: egui::Modifiers::NONE,
+                    },
+                    egui::Event::PointerButton {
+                        pos,
+                        button: egui::PointerButton::Primary,
+                        pressed: false,
+                        modifiers: egui::Modifiers::NONE,
+                    },
+                ],
+                ..Default::default()
+            },
+            |ui| app.frame_ui(ui),
+        );
+        output.textures_delta.clear();
+        assert!(matches!(app.dialog, Some(Dialog::ArtistAbout { .. })));
+        app.backend.shutdown();
+    }
+
+    #[test]
+    fn credits_modal_grows_to_show_its_content() {
+        let (ctx, mut app) = accessible_app("credits-height");
+        apply_flags(&mut app, Some("playlist:pl1"), Some("credits"));
+        for size in [egui::vec2(1280.0, 800.0), egui::vec2(800.0, 600.0)] {
+            for frame in 0..3 {
+                let mut output = ctx.run_ui(
+                    egui::RawInput {
+                        screen_rect: Some(egui::Rect::from_min_size(egui::Pos2::ZERO, size)),
+                        ..Default::default()
+                    },
+                    |ui| app.frame_ui(ui),
+                );
+                output.textures_delta.clear();
+                if frame < 2 {
+                    continue;
+                }
+                for label in ["Artist", "Composition & Lyrics", "Demo label"] {
+                    let visible = output.shapes.iter().any(|shape| {
+                        if let egui::epaint::Shape::Text(text) = &shape.shape {
+                            text.galley.job.text == label
+                                && shape
+                                    .clip_rect
+                                    .contains_rect(text.galley.rect.translate(text.pos.to_vec2()))
+                        } else {
+                            false
+                        }
+                    });
+                    assert!(visible, "{label} must be visible at {size:?}");
+                }
+            }
+        }
+        app.backend.shutdown();
+    }
+
     #[test]
     fn the_about_card_credits_the_author() {
         let (ctx, mut app) = accessible_app("about-credit");

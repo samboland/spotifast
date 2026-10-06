@@ -186,24 +186,6 @@ pub fn side_panel(app: &mut App, ui: &mut egui::Ui) {
                                 app.actions.push(Action::ToggleSaved(now.uri.clone()));
                             }
                             ui.add_space(18.0);
-                            if !now.is_episode
-                                && theme::soft_button(
-                                    ui,
-                                    &palette,
-                                    None,
-                                    &gettext(app.locale, "Credits"),
-                                    false,
-                                )
-                                .clicked()
-                            {
-                                app.actions.push(Action::ShowDialog(
-                                    crate::model::Dialog::TrackCredits {
-                                        uri: now.uri.clone(),
-                                        name: now.title.clone(),
-                                    },
-                                ));
-                            }
-                            ui.add_space(12.0);
                             for artist_ref in &now.artists {
                                 let artist = artist_ref
                                     .id
@@ -214,7 +196,7 @@ pub fn side_panel(app: &mut App, ui: &mut egui::Ui) {
                                 card(ui, &palette, |ui| {
                                     theme::text(
                                         ui,
-                                        gettext(app.locale, "Artist"),
+                                        gettext(app.locale, "About the artist"),
                                         theme::bold(14.0),
                                         palette.text,
                                     );
@@ -252,20 +234,6 @@ pub fn side_panel(app: &mut App, ui: &mut egui::Ui) {
                                         app.actions.push(Action::Open(Page::Artist(id.clone())));
                                     }
                                     if let Some(id) = &artist_ref.id {
-                                        if theme::link(
-                                            ui,
-                                            gettext(app.locale, "About the artist"),
-                                            theme::regular(13.0),
-                                            palette.secondary,
-                                        )
-                                        .clicked()
-                                        {
-                                            app.actions.push(Action::ShowDialog(
-                                                crate::model::Dialog::ArtistAbout {
-                                                    id: id.clone(),
-                                                },
-                                            ));
-                                        }
                                         let uri = format!("spotify:artist:{id}");
                                         let following = app.is_saved(&uri).unwrap_or(false);
                                         if theme::pill_button(
@@ -283,15 +251,156 @@ pub fn side_panel(app: &mut App, ui: &mut egui::Ui) {
                                             app.actions.push(Action::ToggleSaved(uri));
                                         }
                                     }
-                                    if let Some(artist) = &artist {
-                                        if !artist.genres.is_empty() {
-                                            theme::text(
-                                                ui,
-                                                artist.genres.join(", "),
-                                                theme::regular(13.0),
-                                                palette.secondary,
-                                            );
+                                    if let Some(id) = &artist_ref.id {
+                                        let uri = format!("spotify:artist:{id}");
+                                        let bio = app
+                                            .details
+                                            .get(&uri)
+                                            .and_then(Loadable::get)
+                                            .and_then(|details| details.biography.as_deref());
+                                        let preview = bio.map(|bio| {
+                                            let mut text: String = bio.chars().take(220).collect();
+                                            if bio.chars().count() > 220 {
+                                                text.push_str("...");
+                                            }
+                                            text
+                                        });
+                                        let response = ui
+                                            .scope_builder(
+                                                egui::UiBuilder::new().sense(egui::Sense::click()),
+                                                |ui| {
+                                                    ui.set_min_width(ui.available_width());
+                                                    ui.add_space(8.0);
+                                                    if let Some(followers) =
+                                                        artist.as_ref().and_then(|artist| {
+                                                            artist.followers.as_ref()
+                                                        })
+                                                    {
+                                                        let label = crate::i18n::ngettext(
+                                                            app.locale,
+                                                            "{count} follower",
+                                                            "{count} followers",
+                                                            u32::try_from(followers.total)
+                                                                .unwrap_or(u32::MAX),
+                                                        )
+                                                        .replace(
+                                                            "{count}",
+                                                            &crate::util::format_count(
+                                                                followers.total,
+                                                            ),
+                                                        );
+                                                        theme::text(
+                                                            ui,
+                                                            label,
+                                                            theme::regular(13.0),
+                                                            palette.secondary,
+                                                        );
+                                                    }
+                                                    ui.add(
+                                                        egui::Label::new(
+                                                            egui::RichText::new(
+                                                                preview.as_deref().unwrap_or(
+                                                                    &gettext(
+                                                                        app.locale,
+                                                                        "About the artist",
+                                                                    ),
+                                                                ),
+                                                            )
+                                                            .color(palette.secondary),
+                                                        )
+                                                        .wrap()
+                                                        .sense(egui::Sense::hover()),
+                                                    );
+                                                    ui.add_space(8.0);
+                                                },
+                                            )
+                                            .response
+                                            .on_hover_cursor(egui::CursorIcon::PointingHand);
+                                        if response.clicked() {
+                                            app.actions.push(Action::ShowDialog(
+                                                crate::model::Dialog::ArtistAbout {
+                                                    id: id.clone(),
+                                                },
+                                            ));
                                         }
+                                    }
+                                });
+                                ui.add_space(12.0);
+                            }
+                            if !now.is_episode {
+                                card(ui, &palette, |ui| {
+                                    ui.horizontal(|ui| {
+                                        theme::text(
+                                            ui,
+                                            gettext(app.locale, "Credits"),
+                                            theme::bold(14.0),
+                                            palette.text,
+                                        );
+                                        ui.with_layout(
+                                            egui::Layout::right_to_left(egui::Align::Center),
+                                            |ui| {
+                                                if theme::link(
+                                                    ui,
+                                                    gettext(app.locale, "Show all"),
+                                                    theme::bold(13.0),
+                                                    palette.secondary,
+                                                )
+                                                .clicked()
+                                                {
+                                                    app.actions.push(Action::ShowDialog(
+                                                        crate::model::Dialog::TrackCredits {
+                                                            uri: now.uri.clone(),
+                                                            name: now.title.clone(),
+                                                        },
+                                                    ));
+                                                }
+                                            },
+                                        );
+                                    });
+                                    ui.add_space(16.0);
+                                    let details =
+                                        app.details.get(&now.uri).and_then(Loadable::get).cloned();
+                                    if let Some(details) = details {
+                                        let mut shown = std::collections::HashSet::new();
+                                        for credit in &details.credits {
+                                            if !shown.insert((&credit.name, &credit.uri)) {
+                                                continue;
+                                            }
+                                            let roles = details
+                                                .credits
+                                                .iter()
+                                                .filter(|other| {
+                                                    other.name == credit.name
+                                                        && other.uri == credit.uri
+                                                })
+                                                .map(|other| {
+                                                    crate::details::role_label(
+                                                        other.role, app.locale,
+                                                    )
+                                                    .into_owned()
+                                                })
+                                                .collect::<Vec<_>>()
+                                                .join(" · ");
+                                            super::details::credit_row(
+                                                app,
+                                                ui,
+                                                &credit.name,
+                                                &roles,
+                                                credit.uri.as_deref(),
+                                            );
+                                            ui.add_space(8.0);
+                                        }
+                                    } else if let Some(Loadable::Failed(error)) =
+                                        app.details.get(&now.uri)
+                                    {
+                                        ui.add(
+                                            egui::Label::new(
+                                                egui::RichText::new(error).color(palette.secondary),
+                                            )
+                                            .wrap(),
+                                        );
+                                    } else {
+                                        widgets::loading_row(ui, &palette, app.locale);
                                     }
                                 });
                                 ui.add_space(12.0);

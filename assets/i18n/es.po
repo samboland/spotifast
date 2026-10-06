@@ -3236,3 +3236,7 @@ msgstr ""
 
 msgid "Orchestra"
 msgstr ""
+
+#: src/ui/details.rs
+msgid "Composition & Lyrics"
+msgstr ""

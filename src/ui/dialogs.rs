@@ -14,7 +14,16 @@ pub fn show(app: &mut App, ctx: &egui::Context) {
     let palette = app.palette;
     let locale = app.locale;
     let frame = Frame::new()
-        .fill(palette.overlay)
+        .fill(
+            if matches!(
+                dialog,
+                Dialog::ArtistAbout { .. } | Dialog::TrackCredits { .. }
+            ) {
+                palette.window
+            } else {
+                palette.overlay
+            },
+        )
         .stroke(Stroke::new(1.0, palette.outline))
         .corner_radius(CornerRadius::same(theme::RADIUS + 4))
         .inner_margin(Margin::same(24))
