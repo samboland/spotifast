@@ -34,6 +34,12 @@ pub fn show(app: &mut App, ctx: &egui::Context) {
         .show(ctx, |ui| {
             ui.set_width(420.0);
             match dialog {
+                Dialog::ArtistAbout { id } => {
+                    super::details::about(app, ui, &id);
+                }
+                Dialog::TrackCredits { uri, name } => {
+                    super::details::credits(app, ui, &uri, &name);
+                }
                 Dialog::PersonalAppIntro => {
                     theme::text(ui, gettext(locale, "Spend less time waiting for Spotify"), theme::bold(20.0), palette.text);
                     ui.add_space(12.0);

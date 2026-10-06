@@ -400,6 +400,7 @@ pub struct App {
     accent_pending: HashSet<String>,
 
     pub dialog: Option<Dialog>,
+    pub details: HashMap<String, Loadable<crate::details::Details>>,
     cover_request: u64,
     cover_uploads: HashMap<String, u64>,
     /// Successful uploads stay visible while Spotify propagates the new image.
@@ -830,6 +831,7 @@ impl App {
             load_generation: 0,
             album_pages: HashMap::new(),
             artist_pages: HashMap::new(),
+            details: HashMap::new(),
             show_pages: HashMap::new(),
             radio_pages: HashMap::new(),
             track_cache: HashMap::new(),
@@ -1912,6 +1914,24 @@ impl App {
                     }
                     Err(error) => log::warn!("rootlist unavailable: {error}"),
                 },
+                Event::Details {
+                    account,
+                    uri,
+                    result,
+                } => {
+                    if self.user.as_ref().is_some_and(|user| user.id == account) {
+                        if let Ok(details) = &result {
+                            self.request_contains(
+                                details
+                                    .credits
+                                    .iter()
+                                    .filter_map(|credit| credit.uri.clone())
+                                    .collect(),
+                            );
+                        }
+                        self.details.insert(uri, Loadable::from_result(result));
+                    }
+                }
                 Event::Lyrics { uri, result } => {
                     if self.lyrics_uri.as_deref() == Some(uri.as_str()) {
                         self.lyrics = match result {
@@ -2126,6 +2146,7 @@ impl App {
         self.playlist_pages.clear();
         self.album_pages.clear();
         self.artist_pages.clear();
+        self.details.clear();
         self.show_pages.clear();
         self.album_types_requested.clear();
         self.audiobook_shows.clear();
@@ -8712,6 +8733,21 @@ impl App {
                 }
             }
             Action::ShowDialog(mut dialog) => {
+                let details_uri = match &dialog {
+                    Dialog::ArtistAbout { id } => Some(format!("spotify:artist:{id}")),
+                    Dialog::TrackCredits { uri, .. } => Some(uri.clone()),
+                    _ => None,
+                };
+                if let Some(uri) = details_uri
+                    && self.details.get(&uri).is_none_or(Loadable::needs_load)
+                    && let Some(user) = &self.user
+                {
+                    self.details.insert(uri.clone(), Loadable::Loading);
+                    self.backend.send(Command::Details {
+                        account: user.id.clone(),
+                        uri,
+                    });
+                }
                 if let Dialog::EditPlaylist { id, cover, .. } = &mut dialog
                     && let Some(request) = self.cover_uploads.get(id)
                 {
@@ -16537,6 +16573,51 @@ mod tests {
                 data: None,
             })],
         )
+    }
+
+    #[test]
+    fn details_ignore_another_account_and_retry_failures() {
+        let ctx = egui::Context::default();
+        let mut app = headless_app();
+        app.user = Some(User {
+            id: "current".into(),
+            ..Default::default()
+        });
+        let uri = "spotify:artist:demo".to_string();
+        app.handle_backend_events(vec![Event::Details {
+            account: "previous".into(),
+            uri: uri.clone(),
+            result: Ok(crate::details::Details::default()),
+        }]);
+        assert!(!app.details.contains_key(&uri));
+        let dialog = Dialog::ArtistAbout { id: "demo".into() };
+        app.apply(Action::ShowDialog(dialog.clone()), &ctx);
+        assert!(matches!(app.details.get(&uri), Some(Loadable::Loading)));
+        app.handle_backend_events(vec![Event::Details {
+            account: "current".into(),
+            uri: uri.clone(),
+            result: Err("temporary failure".into()),
+        }]);
+        assert!(matches!(app.details.get(&uri), Some(Loadable::Failed(_))));
+        app.apply(Action::ShowDialog(dialog), &ctx);
+        assert!(matches!(app.details.get(&uri), Some(Loadable::Loading)));
+        app.handle_backend_events(vec![Event::Details {
+            account: "current".into(),
+            uri: uri.clone(),
+            result: Ok(crate::details::Details {
+                biography: Some("Returned biography".into()),
+                ..Default::default()
+            }),
+        }]);
+        assert_eq!(
+            app.details
+                .get(&uri)
+                .and_then(Loadable::get)
+                .and_then(|details| details.biography.as_deref()),
+            Some("Returned biography")
+        );
+        app.apply(Action::CloseDialog, &ctx);
+        assert!(app.dialog.is_none());
     }
 
     #[test]

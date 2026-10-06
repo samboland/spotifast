@@ -342,9 +342,7 @@ song, wherever the row sits.
 
 **Now Playing view** in **Settings > Appearance** opens a panel on the right
 with large artwork, the playing context, track and artist links, a save button,
-and a next-track card. The share button copies the track link. Artist cards
-show available images, names, genres, and follow controls; biographies,
-monthly listener counts, and detailed composer credits are not available.
+and a next-track card. The share button copies the track link. Artist cards show available images, names, genres, and follow controls. Open **About the artist** for the full image, follower count, and biography. Open **Credits** for contributor roles and the release label. These extra details use the signed-in local playback session and depend on what Spotify returns. Missing biographies or roles are shown as unavailable, with retry on errors. Monthly listener counts, city statistics, and verification badges are not available.
 The header stays above the panels, so opening one does not move its controls.
 Now Playing and Lyrics share the same saved width. Resize either panel to
 change both. Queue and Lyrics temporarily replace Now Playing; closing them

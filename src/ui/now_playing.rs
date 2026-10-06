@@ -186,6 +186,24 @@ pub fn side_panel(app: &mut App, ui: &mut egui::Ui) {
                                 app.actions.push(Action::ToggleSaved(now.uri.clone()));
                             }
                             ui.add_space(18.0);
+                            if !now.is_episode
+                                && theme::soft_button(
+                                    ui,
+                                    &palette,
+                                    None,
+                                    &gettext(app.locale, "Credits"),
+                                    false,
+                                )
+                                .clicked()
+                            {
+                                app.actions.push(Action::ShowDialog(
+                                    crate::model::Dialog::TrackCredits {
+                                        uri: now.uri.clone(),
+                                        name: now.title.clone(),
+                                    },
+                                ));
+                            }
+                            ui.add_space(12.0);
                             for artist_ref in &now.artists {
                                 let artist = artist_ref
                                     .id
@@ -234,6 +252,20 @@ pub fn side_panel(app: &mut App, ui: &mut egui::Ui) {
                                         app.actions.push(Action::Open(Page::Artist(id.clone())));
                                     }
                                     if let Some(id) = &artist_ref.id {
+                                        if theme::link(
+                                            ui,
+                                            gettext(app.locale, "About the artist"),
+                                            theme::regular(13.0),
+                                            palette.secondary,
+                                        )
+                                        .clicked()
+                                        {
+                                            app.actions.push(Action::ShowDialog(
+                                                crate::model::Dialog::ArtistAbout {
+                                                    id: id.clone(),
+                                                },
+                                            ));
+                                        }
                                         let uri = format!("spotify:artist:{id}");
                                         let following = app.is_saved(&uri).unwrap_or(false);
                                         if theme::soft_button(

@@ -3208,3 +3208,50 @@ msgstr ""
 
 msgid "Show artwork, track details, and the next song on the right."
 msgstr ""
+
+msgid "About the artist"
+msgstr ""
+
+
+msgid "Credits"
+msgstr ""
+
+
+msgid "No biography is available."
+msgstr ""
+
+
+msgid "No contributor credits are available."
+msgstr ""
+
+
+msgid "Label"
+msgstr ""
+
+
+msgid "Main Artist"
+msgstr ""
+
+
+msgid "Featured Artist"
+msgstr ""
+
+
+msgid "Remixer"
+msgstr ""
+
+
+msgid "Actor"
+msgstr ""
+
+
+msgid "Composer"
+msgstr ""
+
+
+msgid "Conductor"
+msgstr ""
+
+
+msgid "Orchestra"
+msgstr ""

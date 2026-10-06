@@ -4,6 +4,7 @@ use std::sync::Arc;
 
 pub mod artist;
 pub mod collection;
+mod details;
 pub(crate) mod devices;
 mod dialogs;
 pub mod home;

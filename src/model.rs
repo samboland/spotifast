@@ -866,6 +866,13 @@ pub struct DragEntry {
 
 #[derive(Clone, Debug)]
 pub enum Dialog {
+    ArtistAbout {
+        id: String,
+    },
+    TrackCredits {
+        uri: String,
+        name: String,
+    },
     CreatePlaylist {
         name: String,
         public: bool,

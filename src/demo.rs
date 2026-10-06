@@ -912,6 +912,35 @@ pub fn apply_flags(app: &mut App, page: Option<&str>, show: Option<&str>) {
                     url: "https://spotifast.rocks/download/".into(),
                 });
             }
+            "about-artist" => {
+                if let Some(id) = app
+                    .now_playing()
+                    .and_then(|now| now.artists.first().and_then(|artist| artist.id.clone()))
+                {
+                    app.details.insert(format!("spotify:artist:{id}"), Loadable::Loaded(crate::details::Details { biography: Some("Demo biography for layout testing. This text is a fixture, not a statement about the pictured artist.".into()), ..Default::default() }));
+                    app.dialog = Some(Dialog::ArtistAbout { id });
+                }
+            }
+            "credits" => {
+                if let Some(now) = app.now_playing() {
+                    app.details.insert(
+                        now.uri.clone(),
+                        Loadable::Loaded(crate::details::Details {
+                            credits: vec![crate::details::Credit {
+                                name: "Demo contributor".into(),
+                                uri: None,
+                                role: 5,
+                            }],
+                            label: Some("Demo label".into()),
+                            ..Default::default()
+                        }),
+                    );
+                    app.dialog = Some(Dialog::TrackCredits {
+                        uri: now.uri,
+                        name: now.title,
+                    });
+                }
+            }
             "personal-app" => app.dialog = Some(Dialog::PersonalAppIntro),
             "many-devices" => {
                 app.show_devices = true;
