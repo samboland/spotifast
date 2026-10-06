@@ -268,16 +268,15 @@ pub fn side_panel(app: &mut App, ui: &mut egui::Ui) {
                                         }
                                         let uri = format!("spotify:artist:{id}");
                                         let following = app.is_saved(&uri).unwrap_or(false);
-                                        if theme::soft_button(
+                                        if theme::pill_button(
                                             ui,
                                             &palette,
-                                            None,
                                             &if following {
                                                 pgettext(app.locale, "artist", "Following")
                                             } else {
                                                 pgettext(app.locale, "artist", "Follow")
                                             },
-                                            following,
+                                            false,
                                         )
                                         .clicked()
                                         {

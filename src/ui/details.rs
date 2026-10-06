@@ -35,7 +35,7 @@ fn follow(app: &mut App, ui: &mut egui::Ui, uri: &str) {
     } else {
         pgettext(app.locale, "artist", "Follow")
     };
-    if theme::soft_button(ui, &app.palette, None, &label, following).clicked() {
+    if theme::pill_button(ui, &app.palette, &label, false).clicked() {
         app.actions.push(Action::ToggleSaved(uri.to_string()));
     }
 }
