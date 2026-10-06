@@ -512,7 +512,7 @@ pub fn window_controls(ui: &mut egui::Ui, palette: &theme::Palette, locale: crat
                         visuals.active.weak_bg_fill = pressed;
                         visuals.active.bg_stroke = egui::Stroke::NONE;
                         let image = icon
-                            .image(palette.secondary, 14.0)
+                            .image(palette.secondary, if close { 18.0 } else { 14.0 })
                             .alt_text(tooltip.as_ref());
                         let button = egui::Button::image(image).frame_when_inactive(false);
                         if ui
