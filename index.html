@@ -1,0 +1,5 @@
+<!doctype html><meta charset="utf-8"><title>Player bar visualizer option</title>
+<style>body{margin:24px;background:#171717;color:#eee;font:16px system-ui}button,select{font:inherit;padding:8px;margin:4px}img{display:block;max-width:100%;margin-top:16px}</style>
+<h1>Player bar visualizer option</h1><p>Before: upstream 995c768. After: optional player bar visualizer clicks. Windows demo settings, 50% interface zoom to show Appearance in full.</p>
+<select id="size"><option>1440x1400</option><option>800x1400</option></select><select id="theme"><option>dark</option><option>light</option></select><button onclick="mode='before';render()">Before</button><button onclick="mode='after';render()">After</button><p id="caption"></p><img id="shot">
+<script>let mode='after';function render(){document.getElementById('shot').src=mode+'-'+document.getElementById('size').value+'-'+document.getElementById('theme').value+'.png';document.getElementById('caption').textContent=mode==='after'?'Candidate':'Upstream'}document.querySelectorAll('select').forEach(s=>s.onchange=render);render()</script>
