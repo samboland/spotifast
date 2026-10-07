@@ -3261,6 +3261,9 @@ impl App {
         }
         let dark = ctx.theme() == egui::Theme::Dark;
         let palette = self.custom_palette().unwrap_or_else(|| {
+            if self.settings.faithful_visuals {
+                return Palette::faithful(dark);
+            }
             if dark {
                 Palette::dark()
             } else {

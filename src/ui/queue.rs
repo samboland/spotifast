@@ -41,7 +41,7 @@ pub fn side_panel(app: &mut App, ui: &mut egui::Ui) {
         "queue-panel",
         theme::SIDE_PANEL_MIN_WIDTH..=560.0,
         app.settings.queue_width,
-        ui.available_width() - super::topbar::least_width(ui.ctx()),
+        ui.available_width() - super::page_min_width(app, ui.ctx()),
     );
     let panel = egui::Panel::right("queue-panel")
         .resizable(true)
@@ -51,6 +51,8 @@ pub fn side_panel(app: &mut App, ui: &mut egui::Ui) {
         .frame(
             Frame::new()
                 .fill(palette.panel)
+                .corner_radius(if app.settings.faithful_visuals { 8 } else { 0 })
+                .outer_margin(if app.settings.faithful_visuals { 6 } else { 0 })
                 .inner_margin(Margin::symmetric(12, 12)),
         );
     let response = panel.show(ui, |ui| {

@@ -774,6 +774,7 @@ pub fn apply_flags(app: &mut App, page: Option<&str>, show: Option<&str>) {
                 };
             }
             "now-playing" => app.settings.now_playing_panel = true,
+            "faithful" => app.settings.faithful_visuals = true,
             "queue" => app.show_queue_panel = true,
             "playing-next" => {
                 app.show_queue_panel = true;
@@ -9235,6 +9236,75 @@ mod tests {
         }
         app.backend.shutdown();
     }
+    #[test]
+    fn faithful_layout_keeps_header_above_panels_and_can_be_disabled() {
+        for light in [false, true] {
+            let (ctx, mut app) = accessible_app("faithful-layout");
+            app.open(Page::Playlist("pl1".into()));
+            app.settings.theme = if light {
+                crate::settings::ThemeChoice::Light
+            } else {
+                crate::settings::ThemeChoice::Dark
+            };
+            app.settings.sidebar_visible = true;
+            app.settings.now_playing_panel = true;
+            for faithful in [false, true, false] {
+                app.settings.faithful_visuals = faithful;
+                app.actions.push(Action::SettingsChanged);
+                for width in [800.0, 1440.0] {
+                    for _ in 0..3 {
+                        let mut output = ctx.run_ui(
+                            egui::RawInput {
+                                screen_rect: Some(egui::Rect::from_min_size(
+                                    egui::Pos2::ZERO,
+                                    egui::vec2(width, 900.0),
+                                )),
+                                ..Default::default()
+                            },
+                            |ui| app.frame_ui(ui),
+                        );
+                        output.textures_delta.clear();
+                    }
+                    let rect = |name: &str| {
+                        egui::containers::panel::PanelState::load(&ctx, egui::Id::new(name))
+                            .unwrap()
+                            .outer_rect
+                    };
+                    let header = rect("main-header");
+                    let sidebar = rect("sidebar");
+                    let search = ctx
+                        .read_response(egui::Id::new("global-search"))
+                        .unwrap()
+                        .rect;
+                    assert!(header.contains_rect(search), "search must fit at {width}");
+                    if faithful {
+                        assert_eq!(header.left(), 0.0);
+                        assert_eq!(header.right(), width);
+                        assert!(sidebar.top() >= header.bottom());
+                        assert_eq!(app.palette, crate::theme::Palette::faithful(!light));
+                        if width == 800.0 {
+                            assert!(!ctx.data(|data| {
+                                data.get_temp::<bool>(egui::Id::new("now-playing-panel-visible"))
+                                    .unwrap_or(false)
+                            }));
+                        }
+                    } else {
+                        assert_eq!(header.left(), sidebar.right());
+                        assert_eq!(
+                            app.palette,
+                            if light {
+                                crate::theme::Palette::light()
+                            } else {
+                                crate::theme::Palette::dark()
+                            }
+                        );
+                    }
+                }
+            }
+            app.backend.shutdown();
+        }
+    }
+
     #[test]
     fn side_panels_start_below_the_shared_header() {
         for theme in ["dark", "light"] {

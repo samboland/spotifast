@@ -24,7 +24,7 @@ pub fn side_panel(app: &mut App, ui: &mut egui::Ui) {
         "now-playing-panel",
         theme::SIDE_PANEL_MIN_WIDTH..=640.0,
         app.settings.lyrics_width,
-        ui.available_width() - super::topbar::least_width(ui.ctx()),
+        ui.available_width() - super::page_min_width(app, ui.ctx()),
     );
     app.actions.push(Action::LoadNowPlayingArtists);
     let response = egui::Panel::right("now-playing-panel")

@@ -46,7 +46,11 @@ pub(crate) fn end_tint_session(ctx: &egui::Context) {
 
 pub fn show(app: &mut App, ui: &mut egui::Ui) {
     let palette = app.palette;
-    let fill = eased_fill(ui.ctx(), palette.panel, app.now_playing_tint());
+    let fill = if app.settings.faithful_visuals {
+        palette.window
+    } else {
+        eased_fill(ui.ctx(), palette.panel, app.now_playing_tint())
+    };
     egui::Panel::bottom("player-bar")
         .exact_size(theme::PLAYER_BAR_HEIGHT)
         .resizable(false)
@@ -88,11 +92,13 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
                     app.actions.push(Action::CyclePlayerBarVis);
                 }
             }
-            ui.painter().hline(
-                rect.x_range(),
-                rect.top() + 0.5,
-                egui::Stroke::new(1.0, palette.outline),
-            );
+            if !app.settings.faithful_visuals {
+                ui.painter().hline(
+                    rect.x_range(),
+                    rect.top() + 0.5,
+                    egui::Stroke::new(1.0, palette.outline),
+                );
+            }
             let width = rect.width();
             let side = (width * 0.3).clamp(200.0, 420.0);
             let cy = rect.center().y;
@@ -536,13 +542,21 @@ fn now_playing_block(app: &mut App, ui: &mut egui::Ui, region: Rect, now: Option
         let saved = app.is_saved(&now.uri).unwrap_or(false);
         let (icon, color, tooltip) = if saved {
             (
-                Icon::HeartFilled,
+                if app.settings.faithful_visuals {
+                    Icon::CircleCheck
+                } else {
+                    Icon::HeartFilled
+                },
                 palette.accent,
                 gettext(app.locale, "Remove from Liked Songs"),
             )
         } else {
             (
-                Icon::Heart,
+                if app.settings.faithful_visuals {
+                    Icon::CirclePlus
+                } else {
+                    Icon::Heart
+                },
                 palette.secondary,
                 gettext(app.locale, "Save to Liked Songs"),
             )

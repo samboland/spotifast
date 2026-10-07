@@ -3259,3 +3259,11 @@ msgstr ""
 #: src/ui/details.rs
 msgid "Composition & Lyrics"
 msgstr ""
+
+#: src/ui/settings.rs
+msgid "Faithful visuals"
+msgstr ""
+
+#: src/ui/settings.rs
+msgid "Use Spotify-style panels, navigation, and playback controls."
+msgstr ""

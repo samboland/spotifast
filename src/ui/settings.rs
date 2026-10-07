@@ -806,6 +806,7 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
     let custom_titlebar = gettext(locale, "Custom title bar");
     let player_bar_vis = gettext(locale, "Player bar visualizer");
     let now_playing_panel = gettext(locale, "Now Playing view");
+    let faithful_visuals = gettext(locale, "Faithful visuals");
     let player_bar_vis_click = gettext(locale, "Click player bar to change visualizer");
     let appearance_rows = [
         RowText::new(theme_title.clone(), {
@@ -892,10 +893,33 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
             now_playing_panel.clone(),
             gettext(locale, "Show artwork, track details, and the next song on the right."),
         ),
+        RowText::new(
+            faithful_visuals.clone(),
+            gettext(locale, "Use Spotify-style panels, navigation, and playback controls."),
+        ),
     ];
     if section_matches(&needle, &appearance, &appearance_rows) {
         any_visible = true;
         section(ui, &palette, &appearance, |ui| {
+            filtered_row(
+                ui,
+                &palette,
+                &needle,
+                &appearance,
+                &appearance_rows[11],
+                |ui| {
+                    if widgets::switch(
+                        ui,
+                        &palette,
+                        &faithful_visuals,
+                        &mut app.settings.faithful_visuals,
+                    )
+                    .changed()
+                    {
+                        changed = true;
+                    }
+                },
+            );
             // Wide enough for the theme's two buttons side by side.
             let theme_buttons_width = theme::soft_button_width(ui, &theme_guide)
                 + theme::soft_button_width(ui, &themes_folder)

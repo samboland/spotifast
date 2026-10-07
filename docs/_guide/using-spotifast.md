@@ -340,6 +340,12 @@ has no place in Spotify's playlist tree. Returning to **Local custom order**
 restores its saved position. Dragging a song onto Liked Songs still saves that
 song, wherever the row sits.
 
+**Faithful visuals** in **Settings > Appearance** uses Spotify-style navigation,
+rounded panels, neutral surfaces, and plus/check controls for saved tracks.
+Home and search move into a header spanning the window. The option is off by
+default and can be switched without restarting. Light and dark themes remain
+available; custom themes retain their own colors.
+
 **Now Playing view** in **Settings > Appearance** opens a panel on the right
 with large artwork, the playing context, track and artist links, a save button,
 and a next-track card. The share button copies the track link. Artist cards show available images, names, genres, and follow controls. Open **About the artist** for the full image, follower count, and biography. Open **Credits** for contributor roles and the release label. These extra details use the signed-in local playback session and depend on what Spotify returns. Missing biographies or roles are shown as unavailable, with retry on errors. Monthly listener counts, city statistics, and verification badges are not available.

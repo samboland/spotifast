@@ -628,11 +628,22 @@ pub fn picked_menu(
     let all_saved = uris.iter().all(|uri| app.is_saved(uri).unwrap_or(false));
     let (icon, text) = if all_saved {
         (
-            Icon::HeartFilled,
+            if app.settings.faithful_visuals {
+                Icon::CircleCheck
+            } else {
+                Icon::HeartFilled
+            },
             gettext(locale, "Remove from Liked Songs"),
         )
     } else {
-        (Icon::Heart, gettext(locale, "Save to Liked Songs"))
+        (
+            if app.settings.faithful_visuals {
+                Icon::CirclePlus
+            } else {
+                Icon::Heart
+            },
+            gettext(locale, "Save to Liked Songs"),
+        )
     };
     if menu_item(ui, &palette, Some(icon), &text) {
         app.actions.push(Action::SetSavedMany {
@@ -859,11 +870,22 @@ pub fn item_menu(
         let saved = app.is_saved(&uri).unwrap_or(false);
         let (icon, text) = if saved {
             (
-                Icon::HeartFilled,
+                if app.settings.faithful_visuals {
+                    Icon::CircleCheck
+                } else {
+                    Icon::HeartFilled
+                },
                 gettext(locale, "Remove from Liked Songs"),
             )
         } else {
-            (Icon::Heart, gettext(locale, "Save to Liked Songs"))
+            (
+                if app.settings.faithful_visuals {
+                    Icon::CirclePlus
+                } else {
+                    Icon::Heart
+                },
+                gettext(locale, "Save to Liked Songs"),
+            )
         };
         if menu_item(ui, &palette, Some(icon), &text) {
             app.actions.push(Action::ToggleSaved(uri.clone()));
@@ -1753,9 +1775,23 @@ fn track_row_contents(
                 child.set_opacity(0.0);
             }
             let (icon, color) = if saved == Some(true) {
-                (Icon::HeartFilled, palette.accent)
+                (
+                    if app.settings.faithful_visuals {
+                        Icon::CircleCheck
+                    } else {
+                        Icon::HeartFilled
+                    },
+                    palette.accent,
+                )
             } else {
-                (Icon::Heart, palette.secondary)
+                (
+                    if app.settings.faithful_visuals {
+                        Icon::CirclePlus
+                    } else {
+                        Icon::Heart
+                    },
+                    palette.secondary,
+                )
             };
             let tooltip = if saved == Some(true) {
                 gettext(app.locale, "Remove from Liked Songs")

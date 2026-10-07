@@ -36,6 +36,10 @@ use crate::theme::{self, Icon};
 pub fn show(app: &mut App, ui: &mut egui::Ui) {
     let ctx = ui.ctx().clone();
     let ctx = &ctx;
+    if app.settings.faithful_visuals {
+        ui.painter()
+            .rect_filled(ui.max_rect(), 0, app.palette.window);
+    }
     keys::handle(app, ctx);
     for path in winamp::dropped_skins(ctx) {
         app.actions.push(Action::InstallSkin(path));
@@ -68,7 +72,7 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
     if app.lyrics_fullscreen.is_some() {
         lyrics::fullscreen(app, ui);
     } else {
-        if app.settings.sidebar_visible {
+        if app.settings.sidebar_visible && !app.settings.faithful_visuals {
             sidebar::show(app, ui);
         }
         let header_space = window_controls_reservation(ctx, false, false, ui.available_width());
@@ -80,6 +84,9 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
             .show_separator_line(false)
             .frame(Frame::new().fill(app.palette.window))
             .show(ui, |ui| topbar::show(app, ui));
+        if app.settings.sidebar_visible && app.settings.faithful_visuals {
+            sidebar::show(app, ui);
+        }
         if app.show_queue_panel {
             queue::side_panel(app, ui);
         }
@@ -87,7 +94,7 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
             lyrics::side_panel(app, ui);
         }
         let now_playing_visible = app.now_playing_panel_visible()
-            && ui.available_width() >= topbar::least_width(ctx) + theme::SIDE_PANEL_MIN_WIDTH;
+            && ui.available_width() >= page_min_width(app, ctx) + theme::SIDE_PANEL_MIN_WIDTH;
         ctx.data_mut(|data| {
             data.insert_temp(Id::new("now-playing-panel-visible"), now_playing_visible)
         });
@@ -118,6 +125,16 @@ fn main_min_width(page: f32, sidebar: bool, right_panel: bool) -> f32 {
     (sidebar + right + page).max(crate::window::MAIN_MIN_SIZE[0])
 }
 
+/// In the faithful layout the header spans the window, so side panels only
+/// need to reserve enough room for page content beneath it.
+pub(crate) fn page_min_width(app: &App, ctx: &Context) -> f32 {
+    if app.settings.faithful_visuals {
+        480.0
+    } else {
+        topbar::least_width(ctx)
+    }
+}
+
 /// The sidebar's narrowest width.
 pub(crate) const SIDEBAR_MIN_WIDTH: f32 = 210.0;
 
@@ -130,7 +147,7 @@ fn keep_room_for_panels(app: &App, ctx: &Context) {
         return;
     }
     let width = main_min_width(
-        topbar::least_width(ctx),
+        page_min_width(app, ctx),
         app.settings.sidebar_visible,
         app.show_queue_panel || app.show_lyrics_panel,
     )
@@ -275,8 +292,19 @@ fn page_tint(app: &mut App) -> Option<Color32> {
 fn central(app: &mut App, ui: &mut egui::Ui) {
     let palette = app.palette;
     let tint = page_tint(app);
+    let faithful = app.settings.faithful_visuals;
+    let background = if faithful {
+        palette.panel
+    } else {
+        palette.window
+    };
     egui::CentralPanel::default()
-        .frame(Frame::new().fill(palette.window))
+        .frame(
+            Frame::new()
+                .fill(background)
+                .corner_radius(if faithful { 8 } else { 0 })
+                .outer_margin(if faithful { 6 } else { 0 }),
+        )
         .show(ui, |ui| {
             let rect = ui.max_rect();
             if let Some(tint) = tint {
@@ -288,9 +316,9 @@ fn central(app: &mut App, ui: &mut egui::Ui) {
                 } else {
                     0.85
                 };
-                let top = blend(palette.window, tint, strength);
+                let top = blend(background, tint, strength);
                 let header = Rect::from_min_size(rect.min, vec2(rect.width(), 340.0));
-                widgets::paint_vertical_gradient(ui, header, top, palette.window);
+                widgets::paint_vertical_gradient(ui, header, top, background);
             }
             ui.spacing_mut().item_spacing = vec2(8.0, 6.0);
             // egui fades a scrolled page's edge into the panel's plain
@@ -310,7 +338,7 @@ fn central(app: &mut App, ui: &mut egui::Ui) {
                         .inner_margin(Margin {
                             left: widgets::PAGE_PADDING as i8,
                             right: widgets::PAGE_PADDING as i8,
-                            top: 4,
+                            top: if faithful { 16 } else { 4 },
                             bottom: 48,
                         })
                         .show(ui, |ui| {
