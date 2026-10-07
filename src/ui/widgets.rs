@@ -2537,11 +2537,12 @@ pub fn shelf(
     if fade_edge && scroll.content_size.x - scroll.state.offset.x > scroll.inner_rect.width() + 1.0
     {
         let rect = scroll.inner_rect;
-        let left = (rect.right() - 64.0).max(rect.left());
+        let left = (rect.right() - 48.0).max(rect.left());
+        let edge = palette.panel.gamma_multiply(0.55);
         let mut mesh = egui::Mesh::default();
         mesh.colored_vertex(pos2(left, rect.top()), Color32::TRANSPARENT);
-        mesh.colored_vertex(rect.right_top(), palette.panel);
-        mesh.colored_vertex(rect.right_bottom(), palette.panel);
+        mesh.colored_vertex(rect.right_top(), edge);
+        mesh.colored_vertex(rect.right_bottom(), edge);
         mesh.colored_vertex(pos2(left, rect.bottom()), Color32::TRANSPARENT);
         mesh.add_triangle(0, 1, 2);
         mesh.add_triangle(0, 2, 3);
