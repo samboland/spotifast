@@ -2852,8 +2852,21 @@ pub fn search_field(
     hint: &str,
     width: f32,
 ) -> egui::Response {
-    let height = 34.0;
-    let (rect, _) = ui.allocate_exact_size(vec2(width, height), Sense::hover());
+    search_field_sized(ui, palette, locale, id, text, hint, vec2(width, 34.0))
+}
+
+/// A search field with an explicit outer size.
+pub fn search_field_sized(
+    ui: &mut Ui,
+    palette: &Palette,
+    locale: Locale,
+    id: egui::Id,
+    text: &mut String,
+    hint: &str,
+    size: Vec2,
+) -> egui::Response {
+    let height = size.y;
+    let (rect, _) = ui.allocate_exact_size(size, Sense::hover());
     let has_focus = ui.memory(|memory| memory.has_focus(id));
     let fill = if has_focus {
         palette.surface_hover

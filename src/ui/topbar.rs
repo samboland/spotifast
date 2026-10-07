@@ -361,14 +361,21 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
             }
             let id = egui::Id::new("global-search");
             let before = app.search.query.clone();
-            let response = super::widgets::search_field(
+            let response = super::widgets::search_field_sized(
                 ui,
                 &palette,
                 app.locale,
                 id,
                 &mut app.search.query,
                 &gettext(locale, "What do you want to play?"),
-                search_width,
+                vec2(
+                    search_width,
+                    if app.settings.faithful_visuals {
+                        40.0
+                    } else {
+                        34.0
+                    },
+                ),
             );
             if app.search.focus_requested {
                 app.search.focus_requested = false;
