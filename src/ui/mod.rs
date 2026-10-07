@@ -398,7 +398,9 @@ fn central(app: &mut App, ui: &mut egui::Ui) {
                         });
                 },
             );
-            header_shadow(ui, scroll.inner_rect, scroll.state.offset.y, palette.dark);
+            if !faithful {
+                header_shadow(ui, scroll.inner_rect, scroll.state.offset.y, palette.dark);
+            }
         });
 }
 
