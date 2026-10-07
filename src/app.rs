@@ -10930,6 +10930,7 @@ mod tests {
                     crate::ui::widgets::shelf(
                         ui,
                         &app.palette,
+                        app.settings.faithful_visuals,
                         "wheel-test-shelf",
                         "Shelf",
                         |ui| {

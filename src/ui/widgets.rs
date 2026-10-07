@@ -2515,6 +2515,7 @@ pub fn card(
 pub fn shelf(
     ui: &mut Ui,
     palette: &Palette,
+    fade_edge: bool,
     id: &str,
     title: &str,
     add_contents: impl FnOnce(&mut Ui),
@@ -2522,7 +2523,7 @@ pub fn shelf(
     ui.add_space(8.0);
     theme::section_title(ui, palette, title);
     ui.add_space(4.0);
-    crate::autoscroll::show(
+    let scroll = crate::autoscroll::show(
         ui,
         egui::ScrollArea::horizontal().id_salt(id),
         egui::Vec2b::new(true, false),
@@ -2533,6 +2534,21 @@ pub fn shelf(
             });
         },
     );
+    if fade_edge && scroll.content_size.x - scroll.state.offset.x > scroll.inner_rect.width() + 1.0
+    {
+        let rect = scroll.inner_rect;
+        let left = (rect.right() - 64.0).max(rect.left());
+        let mut mesh = egui::Mesh::default();
+        mesh.colored_vertex(pos2(left, rect.top()), Color32::TRANSPARENT);
+        mesh.colored_vertex(rect.right_top(), palette.panel);
+        mesh.colored_vertex(rect.right_bottom(), palette.panel);
+        mesh.colored_vertex(pos2(left, rect.bottom()), Color32::TRANSPARENT);
+        mesh.add_triangle(0, 1, 2);
+        mesh.add_triangle(0, 2, 3);
+        ui.painter()
+            .with_clip_rect(rect.intersect(ui.clip_rect()))
+            .add(egui::Shape::mesh(mesh));
+    }
     ui.add_space(12.0);
 }
 
