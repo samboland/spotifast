@@ -99,6 +99,11 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
                     egui::Stroke::new(1.0, palette.outline),
                 );
             }
+            let rect = if app.settings.faithful_visuals {
+                rect.translate(vec2(0.0, -3.0))
+            } else {
+                rect
+            };
             let width = rect.width();
             let side = (width * 0.3).clamp(200.0, 420.0);
             let cy = rect.center().y;
