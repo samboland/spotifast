@@ -595,10 +595,14 @@ fn transport(app: &mut App, ui: &mut egui::Ui, now: Option<&NowPlaying>, region:
     //
     // The buttons row (36) and the progress row (~15, after a 6px gap) form
     // one cluster, centred as a group in the 88px bar: the buttons sit 8px
-    // above the bar's midline and the progress row 23px below it. Measured
-    // on screen this puts equal breathing room above and beneath the
-    // cluster.
-    let cy = region.center().y - 8.0;
+    // above the bar's midline. Faithful visuals centers the combined
+    // button and progress rows, including the time labels.
+    let cy = region.center().y
+        - if app.settings.faithful_visuals {
+            10.5
+        } else {
+            8.0
+        };
     let enabled = now.is_some_and(|now| now.can_control) || app.is_connected();
     let playing = now.is_some_and(|now| now.playing);
     let loading = now.is_some_and(|now| now.loading);

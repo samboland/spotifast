@@ -125,6 +125,42 @@ fn main_min_width(page: f32, sidebar: bool, right_panel: bool) -> f32 {
     (sidebar + right + page).max(crate::window::MAIN_MIN_SIZE[0])
 }
 
+/// Hide egui's full-height resize line while preserving the child controls' style.
+pub(crate) fn begin_panel_resize(app: &App, ui: &mut egui::Ui) -> std::sync::Arc<egui::Style> {
+    let style = ui.style().clone();
+    if app.settings.faithful_visuals {
+        ui.style_mut().visuals.widgets.active.fg_stroke = egui::Stroke::NONE;
+        ui.style_mut().visuals.widgets.hovered.fg_stroke = egui::Stroke::NONE;
+    }
+    style
+}
+
+pub(crate) fn finish_panel_resize(
+    app: &App,
+    ui: &mut egui::Ui,
+    style: std::sync::Arc<egui::Style>,
+    id: &str,
+    right: bool,
+    rect: egui::Rect,
+) {
+    ui.set_style(style);
+    if !app.settings.faithful_visuals {
+        return;
+    }
+    let Some(response) = ui.ctx().read_response(egui::Id::new(id).with("__resize")) else {
+        return;
+    };
+    if response.hovered() || response.dragged() {
+        // Each adjoining panel contributes four points to the gap.
+        let x = if right { rect.left() } else { rect.right() };
+        ui.painter().vline(
+            x,
+            (rect.top() + 12.0)..=(rect.bottom() - 12.0),
+            egui::Stroke::new(2.0, app.palette.text),
+        );
+    }
+}
+
 /// In the faithful layout the header spans the window, so side panels only
 /// need to reserve enough room for page content beneath it.
 pub(crate) fn page_min_width(app: &App, ctx: &Context) -> f32 {
@@ -303,7 +339,7 @@ fn central(app: &mut App, ui: &mut egui::Ui) {
             Frame::new()
                 .fill(background)
                 .corner_radius(if faithful { 8 } else { 0 })
-                .outer_margin(if faithful { 6 } else { 0 }),
+                .outer_margin(if faithful { 4 } else { 0 }),
         )
         .show(ui, |ui| {
             let rect = ui.max_rect();
@@ -538,8 +574,8 @@ pub fn window_controls(ui: &mut egui::Ui, palette: &theme::Palette, locale: crat
                             )
                         } else {
                             (
-                                egui::Color32::from_white_alpha(26),
-                                egui::Color32::from_rgba_unmultiplied(160, 160, 160, 26),
+                                egui::Color32::from_white_alpha(55),
+                                egui::Color32::from_white_alpha(32),
                             )
                         };
                         let visuals = &mut ui.style_mut().visuals.widgets;

@@ -346,15 +346,10 @@ Home and search move into a header spanning the window. The option is off by
 default and can be switched without restarting. Light and dark themes remain
 available; custom themes retain their own colors.
 
-**Now Playing view** in **Settings > Appearance** opens a panel on the right
-with large artwork, the playing context, track and artist links, a save button,
-and a next-track card. The share button copies the track link. Artist cards show available images, names, genres, and follow controls. Open **About the artist** for the full image, follower count, and biography. Open **Credits** for contributor roles and the release label. These extra details use the signed-in local playback session and depend on what Spotify returns. Missing biographies or roles are shown as unavailable, with retry on errors. Monthly listener counts, city statistics, and verification badges are not available.
-The header stays above the panels, so opening one does not move its controls.
-Now Playing and Lyrics share the same saved width. Resize either panel to
-change both. Queue and Lyrics temporarily replace Now Playing; closing them
-brings it back. Narrow windows hide Now Playing until space permits.
-The switch is off by default and is saved across restarts. Enabling it
-refreshes the queue immediately; the next-track card also has a refresh button.
+Faithful visuals also opens Now Playing on the right, with artwork, track links,
+artist cards, Credits, and the next track. Artist cards provide a name link and
+Follow button. Credits shows the contributor roles and release label returned
+by Spotify. The panel yields to Queue and Lyrics and hides in narrow windows.
 
 **Player bar visualizer** in **Settings > Appearance** shows the song moving
 behind the player bar's controls: **Spectrum** draws glowing bars from bass

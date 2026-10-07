@@ -773,7 +773,7 @@ pub fn apply_flags(app: &mut App, page: Option<&str>, show: Option<&str>) {
                     380.0
                 };
             }
-            "now-playing" => app.settings.now_playing_panel = true,
+            "now-playing" => app.settings.faithful_visuals = true,
             "faithful" => app.settings.faithful_visuals = true,
             "queue" => app.show_queue_panel = true,
             "playing-next" => {
@@ -3044,66 +3044,34 @@ mod tests {
             .collect()
     }
 
-    /// The About card ends with the author's credit, and the name opens
-    /// the author's website.
     #[test]
-    fn artist_summary_padding_opens_about() {
-        let (ctx, mut app) = accessible_app("artist-summary-click");
+    fn artist_card_has_no_biography_entry_point() {
+        let (ctx, mut app) = accessible_app("artist-card");
         apply_flags(
             &mut app,
             Some("playlist:pl1"),
-            Some("now-playing,about-card,credits-card"),
+            Some("faithful,about-card,credits-card"),
         );
-        let mut target = None;
         for _ in 0..3 {
             let mut output = ctx.run_ui(
                 egui::RawInput {
                     screen_rect: Some(egui::Rect::from_min_size(
                         egui::Pos2::ZERO,
-                        egui::vec2(1280.0, 1400.0),
+                        egui::vec2(1440.0, 1400.0),
                     )),
                     ..Default::default()
                 },
                 |ui| app.frame_ui(ui),
             );
-            output.textures_delta.clear();
             for shape in &output.shapes {
                 if let egui::epaint::Shape::Text(text) = &shape.shape {
-                    if text.galley.job.text.starts_with("Demo biography") {
-                        let rect = text.galley.rect.translate(text.pos.to_vec2());
-                        target = Some(egui::pos2(rect.left() + 2.0, rect.bottom() + 4.0));
-                    }
+                    assert!(!text.galley.job.text.contains("Demo biography"));
+                    assert_ne!(text.galley.job.text, "About the artist");
                 }
             }
+            output.textures_delta.clear();
         }
-        let pos = target.expect("artist summary is visible");
-        let mut output = ctx.run_ui(
-            egui::RawInput {
-                screen_rect: Some(egui::Rect::from_min_size(
-                    egui::Pos2::ZERO,
-                    egui::vec2(1280.0, 1400.0),
-                )),
-                events: vec![
-                    egui::Event::PointerMoved(pos),
-                    egui::Event::PointerButton {
-                        pos,
-                        button: egui::PointerButton::Primary,
-                        pressed: true,
-                        modifiers: egui::Modifiers::NONE,
-                    },
-                    egui::Event::PointerButton {
-                        pos,
-                        button: egui::PointerButton::Primary,
-                        pressed: false,
-                        modifiers: egui::Modifiers::NONE,
-                    },
-                ],
-                ..Default::default()
-            },
-            |ui| app.frame_ui(ui),
-        );
-        output.textures_delta.clear();
-        assert!(matches!(app.dialog, Some(Dialog::ArtistAbout { .. })));
+        assert!(app.dialog.is_none());
         app.backend.shutdown();
     }
 
@@ -9237,6 +9205,49 @@ mod tests {
         app.backend.shutdown();
     }
     #[test]
+    fn faithful_resize_highlights_fit_the_panel_gaps() {
+        let (ctx, mut app) = accessible_app("faithful-resize");
+        apply_flags(&mut app, Some("playlist:pl1"), Some("faithful"));
+        let screen = egui::Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(1440.0, 900.0));
+        for _ in 0..3 {
+            let mut output = ctx.run_ui(
+                egui::RawInput {
+                    screen_rect: Some(screen),
+                    ..Default::default()
+                },
+                |ui| app.frame_ui(ui),
+            );
+            output.textures_delta.clear();
+        }
+        for (id, right) in [("sidebar", false), ("now-playing-panel", true)] {
+            let rect = egui::containers::panel::PanelState::load(&ctx, egui::Id::new(id))
+                .unwrap()
+                .outer_rect;
+            let x = if right { rect.left() } else { rect.right() };
+            let expected = [
+                egui::pos2(x, rect.top() + 12.0),
+                egui::pos2(x, rect.bottom() - 12.0),
+            ];
+            let mut found = false;
+            for _ in 0..3 {
+                let mut output = ctx.run_ui(
+                    egui::RawInput {
+                        screen_rect: Some(screen),
+                        events: vec![egui::Event::PointerMoved(egui::pos2(x, rect.center().y))],
+                        ..Default::default()
+                    },
+                    |ui| app.frame_ui(ui),
+                );
+                found = output.shapes.iter().any(|shape| matches!(&shape.shape,
+                    egui::epaint::Shape::LineSegment { points, stroke } if *points == expected && stroke.width == 2.0));
+                output.textures_delta.clear();
+            }
+            assert!(found, "centered highlight for {id}");
+        }
+        app.backend.shutdown();
+    }
+
+    #[test]
     fn faithful_layout_keeps_header_above_panels_and_can_be_disabled() {
         for light in [false, true] {
             let (ctx, mut app) = accessible_app("faithful-layout");
@@ -9247,7 +9258,6 @@ mod tests {
                 crate::settings::ThemeChoice::Dark
             };
             app.settings.sidebar_visible = true;
-            app.settings.now_playing_panel = true;
             for faithful in [false, true, false] {
                 app.settings.faithful_visuals = faithful;
                 app.actions.push(Action::SettingsChanged);

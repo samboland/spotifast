@@ -27,6 +27,7 @@ pub fn side_panel(app: &mut App, ui: &mut egui::Ui) {
         ui.available_width() - super::page_min_width(app, ui.ctx()),
     );
     app.actions.push(Action::LoadNowPlayingArtists);
+    let panel_style = super::begin_panel_resize(app, ui);
     let response = egui::Panel::right("now-playing-panel")
         .default_size(app.settings.lyrics_width)
         .size_range(fit.range.clone())
@@ -36,13 +37,14 @@ pub fn side_panel(app: &mut App, ui: &mut egui::Ui) {
             egui::Frame::new()
                 .fill(palette.window)
                 .inner_margin(egui::Margin {
-                    left: 6,
-                    right: 6,
-                    top: 6,
-                    bottom: 6,
+                    left: 4,
+                    right: 4,
+                    top: 4,
+                    bottom: 4,
                 }),
         )
         .show(ui, |ui| {
+            ui.set_style(panel_style.clone());
             egui::Frame::new()
                 .fill(palette.panel)
                 .corner_radius(8)
@@ -196,7 +198,7 @@ pub fn side_panel(app: &mut App, ui: &mut egui::Ui) {
                                 card(ui, &palette, |ui| {
                                     theme::text(
                                         ui,
-                                        gettext(app.locale, "About the artist"),
+                                        gettext(app.locale, "Artist"),
                                         theme::bold(14.0),
                                         palette.text,
                                     );
@@ -222,108 +224,50 @@ pub fn side_panel(app: &mut App, ui: &mut egui::Ui) {
                                         }
                                     }
                                     ui.add_space(8.0);
-                                    if theme::link(
-                                        ui,
-                                        &artist_ref.name,
-                                        theme::bold(15.0),
-                                        palette.text,
-                                    )
-                                    .clicked()
-                                        && let Some(id) = &artist_ref.id
-                                    {
-                                        app.actions.push(Action::Open(Page::Artist(id.clone())));
-                                    }
-                                    if let Some(id) = &artist_ref.id {
-                                        let uri = format!("spotify:artist:{id}");
-                                        let following = app.is_saved(&uri).unwrap_or(false);
-                                        if theme::pill_button(
-                                            ui,
-                                            &palette,
-                                            &if following {
-                                                pgettext(app.locale, "artist", "Following")
-                                            } else {
-                                                pgettext(app.locale, "artist", "Follow")
-                                            },
-                                            false,
-                                        )
-                                        .clicked()
-                                        {
-                                            app.actions.push(Action::ToggleSaved(uri));
-                                        }
-                                    }
-                                    if let Some(id) = &artist_ref.id {
-                                        let uri = format!("spotify:artist:{id}");
-                                        let bio = app
-                                            .details
-                                            .get(&uri)
-                                            .and_then(Loadable::get)
-                                            .and_then(|details| details.biography.as_deref());
-                                        let preview = bio.map(|bio| {
-                                            let mut text: String = bio.chars().take(220).collect();
-                                            if bio.chars().count() > 220 {
-                                                text.push_str("...");
-                                            }
-                                            text
-                                        });
-                                        let response = ui
-                                            .scope_builder(
-                                                egui::UiBuilder::new().sense(egui::Sense::click()),
-                                                |ui| {
-                                                    ui.set_min_width(ui.available_width());
-                                                    ui.add_space(8.0);
-                                                    if let Some(followers) =
-                                                        artist.as_ref().and_then(|artist| {
-                                                            artist.followers.as_ref()
-                                                        })
+                                    ui.horizontal(|ui| {
+                                        ui.with_layout(
+                                            egui::Layout::right_to_left(egui::Align::Center),
+                                            |ui| {
+                                                if let Some(id) = &artist_ref.id {
+                                                    let uri = format!("spotify:artist:{id}");
+                                                    let following =
+                                                        app.is_saved(&uri).unwrap_or(false);
+                                                    let label = if following {
+                                                        pgettext(app.locale, "artist", "Following")
+                                                    } else {
+                                                        pgettext(app.locale, "artist", "Follow")
+                                                    };
+                                                    if theme::pill_button(
+                                                        ui, &palette, &label, false,
+                                                    )
+                                                    .clicked()
                                                     {
-                                                        let label = crate::i18n::ngettext(
-                                                            app.locale,
-                                                            "{count} follower",
-                                                            "{count} followers",
-                                                            u32::try_from(followers.total)
-                                                                .unwrap_or(u32::MAX),
-                                                        )
-                                                        .replace(
-                                                            "{count}",
-                                                            &crate::util::format_count(
-                                                                followers.total,
-                                                            ),
-                                                        );
-                                                        theme::text(
-                                                            ui,
-                                                            label,
-                                                            theme::regular(13.0),
-                                                            palette.secondary,
-                                                        );
+                                                        app.actions.push(Action::ToggleSaved(uri));
                                                     }
-                                                    ui.add(
-                                                        egui::Label::new(
-                                                            egui::RichText::new(
-                                                                preview.as_deref().unwrap_or(
-                                                                    &gettext(
-                                                                        app.locale,
-                                                                        "About the artist",
-                                                                    ),
-                                                                ),
-                                                            )
-                                                            .color(palette.secondary),
+                                                }
+                                                ui.with_layout(
+                                                    egui::Layout::left_to_right(
+                                                        egui::Align::Center,
+                                                    ),
+                                                    |ui| {
+                                                        if theme::link(
+                                                            ui,
+                                                            &artist_ref.name,
+                                                            theme::bold(15.0),
+                                                            palette.text,
                                                         )
-                                                        .wrap()
-                                                        .sense(egui::Sense::hover()),
-                                                    );
-                                                    ui.add_space(8.0);
-                                                },
-                                            )
-                                            .response
-                                            .on_hover_cursor(egui::CursorIcon::PointingHand);
-                                        if response.clicked() {
-                                            app.actions.push(Action::ShowDialog(
-                                                crate::model::Dialog::ArtistAbout {
-                                                    id: id.clone(),
-                                                },
-                                            ));
-                                        }
-                                    }
+                                                        .clicked()
+                                                            && let Some(id) = &artist_ref.id
+                                                        {
+                                                            app.actions.push(Action::Open(
+                                                                Page::Artist(id.clone()),
+                                                            ));
+                                                        }
+                                                    },
+                                                );
+                                            },
+                                        );
+                                    });
                                 });
                                 ui.add_space(12.0);
                             }
@@ -496,6 +440,14 @@ pub fn side_panel(app: &mut App, ui: &mut egui::Ui) {
                         });
                 });
         });
+    super::finish_panel_resize(
+        app,
+        ui,
+        panel_style,
+        "now-playing-panel",
+        true,
+        response.response.rect,
+    );
     let width = response.response.rect.width();
     if (width - app.settings.lyrics_width).abs() > 1.0
         && super::panel_width_chosen(ui.ctx(), "now-playing-panel", &fit)

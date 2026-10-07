@@ -52,10 +52,12 @@ pub fn side_panel(app: &mut App, ui: &mut egui::Ui) {
             Frame::new()
                 .fill(palette.panel)
                 .corner_radius(if app.settings.faithful_visuals { 8 } else { 0 })
-                .outer_margin(if app.settings.faithful_visuals { 6 } else { 0 })
+                .outer_margin(if app.settings.faithful_visuals { 4 } else { 0 })
                 .inner_margin(Margin::symmetric(12, 12)),
         );
+    let panel_style = super::begin_panel_resize(app, ui);
     let response = panel.show(ui, |ui| {
+        ui.set_style(panel_style.clone());
         // Measure buttons first and give the remaining width to the chips.
         // Without `shrink_left`, wrapped chips can overlap the close button.
         let tab = app.queue_tab;
@@ -121,6 +123,14 @@ pub fn side_panel(app: &mut App, ui: &mut egui::Ui) {
             },
         );
     });
+    super::finish_panel_resize(
+        app,
+        ui,
+        panel_style,
+        "queue-panel",
+        true,
+        response.response.rect,
+    );
     let width = response.response.rect.width();
     if (width - app.settings.queue_width).abs() > 1.0
         && super::panel_width_chosen(ui.ctx(), "queue-panel", &fit)

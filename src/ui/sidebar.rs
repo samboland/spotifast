@@ -504,7 +504,7 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
             Frame::new()
                 .fill(palette.panel)
                 .corner_radius(if app.settings.faithful_visuals { 8 } else { 0 })
-                .outer_margin(if app.settings.faithful_visuals { 6 } else { 0 })
+                .outer_margin(if app.settings.faithful_visuals { 4 } else { 0 })
                 .inner_margin(Margin {
                     left: 12,
                     right: 8,
@@ -512,7 +512,9 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
                     bottom: if expanded_art { 0 } else { 8 },
                 }),
         );
+    let panel_style = super::begin_panel_resize(app, ui);
     let response = panel.show(ui, |ui| {
+        ui.set_style(panel_style.clone());
         let art_rect = expanded_art.then(|| expanded_art_rect(ui));
         if let Some(rect) = art_rect.filter(|_| !floating_art) {
             reserve_expanded_art(ui, rect);
@@ -525,6 +527,14 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
             paint_expanded_art(app, ui, rect);
         }
     });
+    super::finish_panel_resize(
+        app,
+        ui,
+        panel_style,
+        "sidebar",
+        false,
+        response.response.rect,
+    );
     let width = response.response.rect.width();
     if (width - app.settings.sidebar_width).abs() > 1.0
         && super::panel_width_chosen(ui.ctx(), "sidebar", &fit)

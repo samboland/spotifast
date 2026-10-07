@@ -805,7 +805,6 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
     let middle_click = gettext(locale, "Middle-click autoscroll");
     let custom_titlebar = gettext(locale, "Custom title bar");
     let player_bar_vis = gettext(locale, "Player bar visualizer");
-    let now_playing_panel = gettext(locale, "Now Playing view");
     let faithful_visuals = gettext(locale, "Faithful visuals");
     let player_bar_vis_click = gettext(locale, "Click player bar to change visualizer");
     let appearance_rows = [
@@ -890,12 +889,8 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
             gettext(locale, "Allow clicks on empty player bar space to cycle the visualizer."),
         ),
         RowText::new(
-            now_playing_panel.clone(),
-            gettext(locale, "Show artwork, track details, and the next song on the right."),
-        ),
-        RowText::new(
             faithful_visuals.clone(),
-            gettext(locale, "Use Spotify-style panels, navigation, and playback controls."),
+            gettext(locale, "Use Spotify-style panels, navigation, and playback controls. Adds Now Playing view."),
         ),
     ];
     if section_matches(&needle, &appearance, &appearance_rows) {
@@ -906,7 +901,7 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
                 &palette,
                 &needle,
                 &appearance,
-                &appearance_rows[11],
+                &appearance_rows[10],
                 |ui| {
                     if widgets::switch(
                         ui,
@@ -916,6 +911,9 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
                     )
                     .changed()
                     {
+                        if app.settings.faithful_visuals {
+                            app.actions.push(crate::model::Action::RefreshQueue);
+                        }
                         changed = true;
                     }
                 },
@@ -1100,28 +1098,6 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
                     },
                 );
             }
-            filtered_row(
-                ui,
-                &palette,
-                &needle,
-                &appearance,
-                &appearance_rows[10],
-                |ui| {
-                    if widgets::switch(
-                        ui,
-                        &palette,
-                        &now_playing_panel,
-                        &mut app.settings.now_playing_panel,
-                    )
-                    .changed()
-                    {
-                        if app.settings.now_playing_panel {
-                            app.actions.push(crate::model::Action::RefreshQueue);
-                        }
-                        changed = true;
-                    }
-                },
-            );
             filtered_row(
                 ui,
                 &palette,

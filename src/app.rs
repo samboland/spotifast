@@ -1353,7 +1353,7 @@ impl App {
     }
 
     pub fn now_playing_panel_visible(&self) -> bool {
-        self.settings.now_playing_panel && !self.show_queue_panel && !self.show_lyrics_panel
+        self.settings.faithful_visuals && !self.show_queue_panel && !self.show_lyrics_panel
     }
 
     pub fn now_playing(&self) -> Option<NowPlaying> {
@@ -9157,18 +9157,13 @@ impl App {
             Action::LoadNowPlayingArtists => {
                 if let Some(now) = self
                     .now_playing()
-                    .filter(|_| self.settings.now_playing_panel)
+                    .filter(|_| self.settings.faithful_visuals)
                 {
-                    let mut uris: Vec<_> = now
-                        .artists
-                        .iter()
-                        .filter_map(|artist| {
-                            artist.id.as_ref().map(|id| format!("spotify:artist:{id}"))
-                        })
-                        .collect();
-                    if !now.is_episode {
-                        uris.push(now.uri.clone());
-                    }
+                    let uris = if now.is_episode {
+                        Vec::new()
+                    } else {
+                        vec![now.uri.clone()]
+                    };
                     if let Some(user) = &self.user {
                         for uri in uris {
                             if self
@@ -16653,7 +16648,7 @@ mod tests {
         let ctx = egui::Context::default();
         let mut app = headless_app();
         assert!(!app.now_playing_panel_visible());
-        app.settings.now_playing_panel = true;
+        app.settings.faithful_visuals = true;
         assert!(app.now_playing_panel_visible());
         app.apply(Action::ToggleQueuePanel, &ctx);
         assert!(!app.now_playing_panel_visible());
@@ -16663,7 +16658,7 @@ mod tests {
         assert!(!app.now_playing_panel_visible());
         app.apply(Action::ToggleLyricsPanel, &ctx);
         assert!(app.now_playing_panel_visible());
-        app.settings.now_playing_panel = false;
+        app.settings.faithful_visuals = false;
         assert!(!app.now_playing_panel_visible());
     }
 
